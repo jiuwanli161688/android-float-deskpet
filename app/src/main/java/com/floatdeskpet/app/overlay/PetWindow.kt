@@ -6,13 +6,16 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.util.dpSize
 import kotlin.math.abs
 import kotlin.math.hypot
+import kotlin.math.min
 import kotlin.random.Random
 
 class PetWindow(private val context: Context) : PetActions {
@@ -28,13 +31,14 @@ class PetWindow(private val context: Context) : PetActions {
     private var restoreY = 0
     private var walking = false
     private var flinging = false
-    private var walkDir = 1
     private var flingVx = 0f
     private var flingVy = 0f
     private var lastAmbientAt = 0L
     private var lastBatteryAt = 0L
     private var heavyPaused = false
     private var moveAnim: ValueAnimator? = null
+    private var bubbleAttached = false
+    private val autonomy = PetAutonomy()
     var onPeekState: ((Boolean) -> Unit)? = null
 
     private val params = WindowManager.LayoutParams().apply {
@@ -50,7 +54,24 @@ class PetWindow(private val context: Context) : PetActions {
         }
     }
 
+    private val bubbleParams = WindowManager.LayoutParams().apply {
+        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        format = PixelFormat.TRANSLUCENT
+        gravity = Gravity.TOP or Gravity.START
+        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        width = 1
+        height = 1
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+    }
+
     init {
+        view.onBubbleChanged = { syncBubble() }
         view.onDrag = { dx, dy ->
             stopMotion()
             moveBy(dx, dy)
@@ -106,6 +127,7 @@ class PetWindow(private val context: Context) : PetActions {
         try {
             wm.addView(view, params)
             attached = true
+            attachBubble()
         } catch (t: Throwable) {
             attached = false
             throw t
@@ -123,6 +145,7 @@ class PetWindow(private val context: Context) : PetActions {
         moveAnim?.cancel()
         view.hideMenu()
         view.hideBubbleNow()
+        detachBubble()
         if (!attached) {
             sfx.release()
             return
@@ -177,6 +200,7 @@ class PetWindow(private val context: Context) : PetActions {
         handler.removeCallbacks(idleNap)
         handler.removeCallbacks(idlePeek)
         handler.removeCallbacks(idleAmbient)
+        handler.removeCallbacks(resumeWalk)
         view.pauseAnim()
     }
 
@@ -265,6 +289,7 @@ class PetWindow(private val context: Context) : PetActions {
     private fun enterNap() {
         walking = false
         flinging = false
+        autonomy.cancel()
         view.setNapping(true)
     }
 
@@ -274,6 +299,7 @@ class PetWindow(private val context: Context) : PetActions {
             return
         }
         walking = false
+        autonomy.cancel()
         flinging = true
         flingVx = vx
         flingVy = vy
@@ -286,14 +312,25 @@ class PetWindow(private val context: Context) : PetActions {
         view.setNapping(false)
         walking = true
         flinging = false
-        walkDir = if (Random.nextBoolean()) 1 else -1
+        autonomy.begin(params.x, params.y, walkBounds(), SystemClock.uptimeMillis())
+        view.setFacingRight(autonomy.lastFaceRight)
         handler.removeCallbacks(motion)
         handler.post(motion)
-        handler.postDelayed({
-            walking = false
-            persist()
-            if (canAutonomous() && Random.nextFloat() < 0.45f) enterNap()
-        }, (9000L..16000L).random())
+    }
+
+    private val resumeWalk = Runnable { if (canAutonomous()) startWalk() }
+
+    private fun finishWalk(nap: Boolean) {
+        walking = false
+        autonomy.cancel()
+        persist()
+        if (!canAutonomous()) return
+        if (nap) {
+            enterNap()
+            handler.postDelayed(resumeWalk, (10_000L..18_000L).random())
+        } else {
+            handler.postDelayed(resumeWalk, (4_500L..9_500L).random())
+        }
     }
 
     private fun startPeek() {
@@ -342,6 +379,7 @@ class PetWindow(private val context: Context) : PetActions {
         handler.removeCallbacks(idleNap)
         handler.removeCallbacks(idlePeek)
         handler.removeCallbacks(idleAmbient)
+        handler.removeCallbacks(resumeWalk)
         if (!attached || heavyPaused || !settings.visible) return
         handler.postDelayed(idleWalk, 16_000L)
         handler.postDelayed(idleNap, 30_000L)
@@ -391,19 +429,24 @@ class PetWindow(private val context: Context) : PetActions {
                 }
             }
             if (walking && !peeking) {
-                val step = (3 * walkDir).coerceAtLeast(-12)
-                val b = bounds()
-                params.x += step
-                if (params.x <= b.minX) {
-                    params.x = b.minX
-                    walkDir = 1
-                } else if (params.x >= b.maxX) {
-                    params.x = b.maxX
-                    walkDir = -1
+                val stepped = autonomy.step(params.x, params.y, walkBounds(), SystemClock.uptimeMillis())
+                params.x = stepped.first
+                params.y = stepped.second
+                view.setFacingRight(autonomy.lastFaceRight)
+                when (stepped.third) {
+                    PetAutonomy.Result.MOVE -> {
+                        update()
+                        keep = true
+                    }
+                    PetAutonomy.Result.NAP -> {
+                        update()
+                        finishWalk(nap = true)
+                    }
+                    PetAutonomy.Result.IDLE -> {
+                        update()
+                        finishWalk(nap = false)
+                    }
                 }
-                params.y = params.y.coerceIn(b.minY, b.maxY)
-                update()
-                keep = true
             }
             if (keep) handler.postDelayed(this, 32L)
         }
@@ -430,7 +473,9 @@ class PetWindow(private val context: Context) : PetActions {
     private fun stopMotion() {
         walking = false
         flinging = false
+        autonomy.cancel()
         handler.removeCallbacks(motion)
+        handler.removeCallbacks(resumeWalk)
         moveAnim?.cancel()
         moveAnim = null
     }
@@ -493,9 +538,89 @@ class PetWindow(private val context: Context) : PetActions {
             wm.updateViewLayout(view, params)
         } catch (_: Throwable) {
         }
+        syncBubble()
+    }
+
+    private fun attachBubble() {
+        if (bubbleAttached) return
+        try {
+            wm.addView(view.speechBubble, bubbleParams)
+            bubbleAttached = true
+            syncBubble()
+        } catch (_: Throwable) {
+            bubbleAttached = false
+        }
+    }
+
+    private fun detachBubble() {
+        if (!bubbleAttached) return
+        try {
+            wm.removeViewImmediate(view.speechBubble)
+        } catch (_: Throwable) {
+            try {
+                wm.removeView(view.speechBubble)
+            } catch (_: Throwable) {
+            }
+        }
+        bubbleAttached = false
+    }
+
+    private fun syncBubble() {
+        if (!attached || !bubbleAttached) return
+        val bubble = view.speechBubble
+        val show = bubble.visibility == View.VISIBLE &&
+            view.visibility == View.VISIBLE &&
+            !heavyPaused
+        if (!show) {
+            if (bubbleParams.width != 1 || bubbleParams.height != 1) {
+                bubbleParams.width = 1
+                bubbleParams.height = 1
+                try {
+                    wm.updateViewLayout(bubble, bubbleParams)
+                } catch (_: Throwable) {
+                }
+            }
+            return
+        }
+        val dm = context.resources.displayMetrics
+        val maxW = min(context.dpSize(200), (dm.widthPixels * 3) / 5).coerceAtLeast(1)
+        bubble.maxWidth = maxW
+        bubble.measure(
+            View.MeasureSpec.makeMeasureSpec(maxW, View.MeasureSpec.AT_MOST),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+        )
+        val bw = bubble.measuredWidth.coerceAtLeast(1)
+        val bh = bubble.measuredHeight.coerceAtLeast(1)
+        val placed = SpeechBubbleLayout.place(
+            params.x,
+            params.y,
+            params.width,
+            params.height,
+            bw,
+            bh,
+            dm.widthPixels,
+            dm.heightPixels,
+            context.dpSize(8),
+            context.dpSize(28),
+            context.dpSize(16),
+            context.dpSize(10),
+        )
+        bubbleParams.width = bw
+        bubbleParams.height = bh
+        bubbleParams.x = placed.first
+        bubbleParams.y = placed.second
+        try {
+            wm.updateViewLayout(bubble, bubbleParams)
+        } catch (_: Throwable) {
+        }
     }
 
     private data class Bounds(val minX: Int, val maxX: Int, val minY: Int, val maxY: Int, val screenW: Int)
+
+    private fun walkBounds(): WalkBounds {
+        val b = bounds()
+        return WalkBounds(b.minX, b.maxX, b.minY, b.maxY)
+    }
 
     private fun bounds(): Bounds {
         val dm = context.resources.displayMetrics
