@@ -1,0 +1,17 @@
+# 产品锁定
+
+独立 Android 系统悬浮窗桌宠，不是全屏陪伴 App，也不依赖任何 PC / Tauri 桌宠工程。
+
+## 已锁定
+
+- 形态：`WindowManager` + `TYPE_APPLICATION_OVERLAY`，浮在微信 / 浏览器等其它应用之上。
+- 交互：拖动、点击反应、待机循环、松手回弹；可选穿透 / 幽灵模式。
+- 数据：纯本地。无账号、无广告、无云、v1 无 AI 对话。核心功能不声明 `INTERNET`。
+- 系统：仅 Android。`minSdk 26`，`targetSdk 34`，`applicationId = com.floatdeskpet.app`。
+- 角色：二次元 Q 版成年少女「杏杏」，健康向，非写实抠图。待机 + 点击帧动画。
+- 运行：前台服务 + 常驻通知（运行中 / 显隐 / 退出）。退出时卸窗并停服务。
+- 设置页：Material3 中文；大小、透明度、始终显示、穿透、启停、国产 ROM 省电说明、隐私说明。
+
+## 明确不做（v1）
+
+Live2D Cubism、iOS、AI 聊天、商店上架材料、无障碍 App 过滤、多只桌宠刷屏、任何服务端。
