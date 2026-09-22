@@ -13,6 +13,8 @@ import com.floatdeskpet.app.R
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivityMainBinding
 import com.floatdeskpet.app.overlay.OverlayService
+import com.floatdeskpet.app.overlay.PetFrames
+import com.floatdeskpet.app.overlay.PetStats
 import com.floatdeskpet.app.util.OverlayPermission
 
 class MainActivity : AppCompatActivity() {
@@ -54,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         binding.sliderOpacity.value = settings.opacity.toFloat()
         binding.switchAlways.isChecked = settings.alwaysShow
         binding.switchGhost.isChecked = settings.passThrough
+        binding.switchMute.isChecked = settings.muted
         applyPreview()
 
         binding.sliderSize.addOnChangeListener { _, value, fromUser ->
@@ -71,6 +74,19 @@ class MainActivity : AppCompatActivity() {
         }
         binding.switchGhost.setOnCheckedChangeListener { _, checked ->
             settings.passThrough = checked
+        }
+        binding.switchMute.setOnCheckedChangeListener { _, checked ->
+            settings.muted = checked
+        }
+        syncOutfitGroup()
+        binding.outfitGroup.addOnButtonCheckedListener { _, id, checked ->
+            if (!checked) return@addOnButtonCheckedListener
+            settings.outfit = when (id) {
+                R.id.outfitPajama -> PetSettings.OUTFIT_PAJAMA
+                R.id.outfitHoodie -> PetSettings.OUTFIT_HOODIE
+                else -> PetSettings.OUTFIT_CASUAL
+            }
+            applyPreview()
         }
     }
 
@@ -107,10 +123,19 @@ class MainActivity : AppCompatActivity() {
         binding.notifHint.visibility = binding.btnNotif.visibility
         binding.switchAlways.isChecked = settings.alwaysShow
         binding.switchGhost.isChecked = settings.passThrough
+        binding.switchMute.isChecked = settings.muted
         binding.sliderSize.value = settings.sizeDp.toFloat()
         binding.sliderOpacity.value = settings.opacity.toFloat()
         binding.labelSize.text = getString(R.string.label_size, settings.sizeDp)
         binding.labelOpacity.text = getString(R.string.label_opacity, settings.opacity)
+        PetStats.applyDecay(settings)
+        binding.statsLine.text = getString(
+            R.string.stats_line,
+            settings.mood,
+            settings.affection,
+            settings.feedCount,
+        )
+        syncOutfitGroup()
         applyPreview()
 
         when {
@@ -130,6 +155,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyPreview() {
+        binding.preview.setImageResource(PetFrames.of(settings.outfit).idle)
         binding.preview.alpha = settings.opacity / 100f
         val h = (settings.sizeDp * resources.displayMetrics.density).toInt()
         val w = (h * 3) / 4
@@ -137,6 +163,17 @@ class MainActivity : AppCompatActivity() {
         lp.width = w
         lp.height = h
         binding.preview.layoutParams = lp
+    }
+
+    private fun syncOutfitGroup() {
+        val id = when (settings.outfit) {
+            PetSettings.OUTFIT_PAJAMA -> R.id.outfitPajama
+            PetSettings.OUTFIT_HOODIE -> R.id.outfitHoodie
+            else -> R.id.outfitCasual
+        }
+        if (binding.outfitGroup.checkedButtonId != id) {
+            binding.outfitGroup.check(id)
+        }
     }
 
     private fun hasNotif(): Boolean {

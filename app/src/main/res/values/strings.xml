@@ -4,7 +4,7 @@
     <string name="character_name">杏杏</string>
 
     <string name="hero_title">你好，我是杏杏</string>
-    <string name="hero_body">我会以透明小窗浮在微信、浏览器等应用上方陪着你。不读聊天、不联网、没有广告，只是一只安静的桌宠。</string>
+    <string name="hero_body">我会以透明小窗浮在微信、浏览器等应用上方陪着你。会自己走走、打盹、躲到屏幕边上探头。不读聊天、不联网、没有广告。</string>
 
     <string name="perm_title">需要「显示在其他应用上层」</string>
     <string name="perm_body">这是桌宠能浮在别的应用上面的系统开关，不是通讯录或定位权限。下一步会打开系统页面，请打开「允许显示在其他应用的上层」。我们只用它画出一只角色，不会弹广告、也不会挡支付界面做坏事。</string>
@@ -22,17 +22,30 @@
     <string name="section_look">外观</string>
     <string name="label_size">大小 %1$d dp</string>
     <string name="label_opacity">透明度 %1$d%%</string>
+    <string name="label_outfit">换装</string>
+    <string name="outfit_casual">日常</string>
+    <string name="outfit_pajama">睡衣</string>
+    <string name="outfit_hoodie">出行</string>
+    <string name="outfit_desc">三套衣服都是本地帧，可随时切换。</string>
+    <string name="section_feel">心情</string>
+    <string name="stats_line">心情 %1$d · 亲密度 %2$d · 零食 %3$d</string>
+    <string name="stats_desc">摸摸、喂食会变好；不理她太久会慢慢下降。零食会随时间慢慢补回来。</string>
     <string name="section_behavior">行为</string>
     <string name="always_show_title">始终显示</string>
     <string name="always_show_desc">开启后，开机且此前已启动时会自动唤出桌宠。</string>
     <string name="pass_through_title">穿透 / 幽灵模式</string>
     <string name="pass_through_desc">开启后触摸会穿过杏杏，方便点下层应用。可在通知栏或本页关闭。</string>
+    <string name="mute_title">静音</string>
+    <string name="mute_desc">关闭出现、点击、菜单、躲藏的短音效。</string>
+    <string name="menu_pet">摸摸</string>
+    <string name="menu_feed">喂食</string>
+    <string name="menu_sleep">睡觉</string>
     <string name="section_oem">省电与国产系统</string>
     <string name="oem_body">部分手机在锁屏或切到后台后会杀掉前台服务，桌宠会消失。\n\n小米 / 红米：设置 → 应用设置 → 应用管理 → 悬浮桌宠 → 省电策略选「无限制」；同时允许自启动、后台弹出界面。\n\n华为 / 荣耀：设置 → 应用 → 应用启动管理 → 手动管理，打开自启动、关联启动、后台活动。\n\nOPPO / 一加 / vivo：关闭电池优化，允许悬浮窗与后台运行。\n\n通用路径：设置 → 应用 → 悬浮桌宠 → 电池 → 不优化。</string>
     <string name="privacy_link">隐私说明（纯本地，不联网）</string>
 
     <string name="privacy_title">隐私说明</string>
-    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会创建账号、上传数据或展示广告。\n\n本机保存的内容仅包括：桌宠位置、大小、透明度、是否穿透、是否始终显示、是否正在运行。这些数据存在系统 SharedPreferences，卸载即删。\n\n「显示在其他应用上层」只用于绘制透明角色窗口，应用不会读取其它 App 的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显隐 / 退出）。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
+    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会创建账号、上传数据或展示广告。\n\n本机保存的内容仅包括：桌宠位置、大小、透明度、换装、静音、心情、亲密度、零食数量、是否穿透、是否始终显示、是否正在运行。这些数据存在系统 SharedPreferences，卸载即删。\n\n「显示在其他应用上层」只用于绘制透明角色窗口，应用不会读取其它 App 的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显隐 / 退出）。电量提示只读系统电池状态，不联网。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
 
     <string name="notif_channel">桌宠运行中</string>
     <string name="notif_title">杏杏正在陪伴你</string>
