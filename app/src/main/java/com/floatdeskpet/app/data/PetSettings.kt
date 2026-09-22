@@ -39,6 +39,38 @@ class PetSettings private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_VISIBLE, true)
         set(value) = prefs.edit().putBoolean(KEY_VISIBLE, value).apply()
 
+    var muted: Boolean
+        get() = prefs.getBoolean(KEY_MUTE, false)
+        set(value) = prefs.edit().putBoolean(KEY_MUTE, value).apply()
+
+    var outfit: String
+        get() = prefs.getString(KEY_OUTFIT, OUTFIT_CASUAL) ?: OUTFIT_CASUAL
+        set(value) = prefs.edit().putString(KEY_OUTFIT, value).apply()
+
+    var mood: Int
+        get() = prefs.getInt(KEY_MOOD, 72)
+        set(value) = prefs.edit().putInt(KEY_MOOD, value.coerceIn(0, 100)).apply()
+
+    var affection: Int
+        get() = prefs.getInt(KEY_AFFECTION, 48)
+        set(value) = prefs.edit().putInt(KEY_AFFECTION, value.coerceIn(0, 100)).apply()
+
+    var feedCount: Int
+        get() = prefs.getInt(KEY_FEED, FEED_MAX)
+        set(value) = prefs.edit().putInt(KEY_FEED, value.coerceIn(0, FEED_MAX)).apply()
+
+    var lastDecayAt: Long
+        get() = prefs.getLong(KEY_DECAY, 0L)
+        set(value) = prefs.edit().putLong(KEY_DECAY, value).apply()
+
+    var lastInteractAt: Long
+        get() = prefs.getLong(KEY_INTERACT, 0L)
+        set(value) = prefs.edit().putLong(KEY_INTERACT, value).apply()
+
+    var lastFeedRegenAt: Long
+        get() = prefs.getLong(KEY_FEED_REGEN, 0L)
+        set(value) = prefs.edit().putLong(KEY_FEED_REGEN, value).apply()
+
     companion object {
         const val PREFS = "pet"
         const val UNSET = Int.MIN_VALUE
@@ -50,6 +82,19 @@ class PetSettings private constructor(context: Context) {
         const val KEY_ALWAYS = "always_show"
         const val KEY_RUNNING = "running"
         const val KEY_VISIBLE = "visible"
+        const val KEY_MUTE = "muted"
+        const val KEY_OUTFIT = "outfit"
+        const val KEY_MOOD = "mood"
+        const val KEY_AFFECTION = "affection"
+        const val KEY_FEED = "feed_count"
+        const val KEY_DECAY = "last_decay"
+        const val KEY_INTERACT = "last_interact"
+        const val KEY_FEED_REGEN = "last_feed_regen"
+        const val OUTFIT_CASUAL = "casual"
+        const val OUTFIT_PAJAMA = "pajama"
+        const val OUTFIT_HOODIE = "hoodie"
+        const val FEED_MAX = 8
+        const val FEED_REGEN_MS = 3L * 60L * 60L * 1000L
 
         @Volatile
         private var instance: PetSettings? = null

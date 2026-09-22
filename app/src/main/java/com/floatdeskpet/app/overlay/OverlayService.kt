@@ -5,10 +5,13 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
+import android.os.BatteryManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -21,12 +24,51 @@ import com.floatdeskpet.app.util.OverlayPermission
 class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
     private lateinit var settings: PetSettings
     private var window: PetWindow? = null
+    private var shake: ShakeWake? = null
+    private var lastCharging: Boolean? = null
+    private var toldLow = false
+
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> window?.pauseHeavy()
+                Intent.ACTION_SCREEN_ON -> window?.resumeHeavy()
+            }
+        }
+    }
+
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent == null) return
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
+            val pct = level * 100 / scale
+            val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+            val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                status == BatteryManager.BATTERY_STATUS_FULL
+            if (pct in 0..15 && !charging && !toldLow) {
+                toldLow = true
+                window?.onBatteryLow()
+            }
+            if (charging && lastCharging == false) {
+                window?.onCharging()
+            }
+            if (charging) toldLow = false
+            lastCharging = charging
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
         settings = PetSettings.get(this)
         ensureChannel()
         settings.prefs.registerOnSharedPreferenceChangeListener(this)
+        shake = ShakeWake(this) { window?.onShake() }
+        registerSys(screenReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        })
+        registerSys(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -54,6 +96,16 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
     override fun onDestroy() {
         settings.prefs.unregisterOnSharedPreferenceChangeListener(this)
+        shake?.stop()
+        shake = null
+        try {
+            unregisterReceiver(screenReceiver)
+        } catch (_: Throwable) {
+        }
+        try {
+            unregisterReceiver(batteryReceiver)
+        } catch (_: Throwable) {
+        }
         teardownWindow()
         super.onDestroy()
     }
@@ -74,6 +126,7 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             PetSettings.KEY_GHOST,
             PetSettings.KEY_X,
             PetSettings.KEY_Y,
+            PetSettings.KEY_OUTFIT,
             -> window?.applySettings()
             PetSettings.KEY_VISIBLE -> applyVisibility()
             PetSettings.KEY_RUNNING -> if (!settings.running) quit()
@@ -86,7 +139,12 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             quit()
             return
         }
-        val w = window ?: PetWindow(this).also { window = it }
+        val w = window ?: PetWindow(this).also { created ->
+            created.onPeekState = { peeking ->
+                if (peeking) shake?.start() else shake?.stop()
+            }
+            window = created
+        }
         try {
             w.attach()
             applyVisibility()
@@ -100,6 +158,7 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     private fun teardownWindow() {
+        shake?.stop()
         try {
             window?.detach()
         } catch (_: Throwable) {
@@ -185,6 +244,14 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         ch.enableVibration(false)
         ch.setSound(null, null)
         nm.createNotificationChannel(ch)
+    }
+
+    private fun registerSys(receiver: BroadcastReceiver, filter: IntentFilter) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(receiver, filter)
+        }
     }
 
     companion object {

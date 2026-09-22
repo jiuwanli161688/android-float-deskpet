@@ -2,7 +2,7 @@
 
 一只浮在其它应用上面的 Android 桌宠。本地运行，不联网、无账号、无广告。
 
-默认角色是二次元 Q 版少女「杏杏」：可拖动、点一下会跳/眨眼，待机会轻微呼吸。打开穿透后触摸会穿过她，方便点底下的微信或浏览器。
+默认角色是二次元 Q 版少女「杏杏」：可拖动、点一下会跳/眨眼，待机会走路、打盹、躲到屏幕边上探头。打开穿透后触摸会穿过她，方便点底下的微信或浏览器。
 
 ## 环境
 
@@ -25,8 +25,8 @@ sdk.dir=/你的/Android/Sdk
 
 已归档（也是 CI / 本机产物的副本）：
 
-- Debug：`releases/float-deskpet-1.0.0-debug.apk`
-- Release（debug 签名，可直接装）：`releases/float-deskpet-1.0.0-release.apk`
+- Debug：`releases/float-deskpet-1.1.0-debug.apk`
+- Release（debug 签名，可直接装）：`releases/float-deskpet-1.1.0-release.apk`
 
 Gradle 原始输出：
 
@@ -34,10 +34,19 @@ Gradle 原始输出：
 - `app/build/outputs/apk/release/app-release.apk`
 
 ```bash
-adb install -r releases/float-deskpet-1.0.0-debug.apk
+adb install -r releases/float-deskpet-1.1.0-debug.apk
 ```
 
 装好后打开「悬浮桌宠」→「去授权」→ 系统页打开「允许显示在其他应用的上层」→ 返回应用点「召唤桌宠」。建议再允许通知，才能用通知栏隐藏或退出。
+
+## 怎么玩
+
+- 单击：跳跃反应 + 气泡
+- 双击：轮换表情（开心 / 害羞 / 犯困 / 低落）
+- 长按：弹出 摸摸 / 喂食 / 睡觉
+- 甩一下：带惯性滑行，碰到边会弹
+- 待久了：自己走路、打盹，再久一点会半藏在左/右边缘；点探头或摇一摇手机可把她唤回来
+- 设置里可换装（日常 / 睡衣 / 出行）和静音
 
 ## 国产系统注意
 
@@ -52,7 +61,7 @@ adb install -r releases/float-deskpet-1.0.0-debug.apk
 
 ## 以后换角色帧
 
-替换这些文件，**文件名不要改**：
+默认「日常」装替换这些文件，**文件名不要改**：
 
 | 文件 | 用途 |
 | --- | --- |
@@ -61,6 +70,10 @@ adb install -r releases/float-deskpet-1.0.0-debug.apk
 | `app/src/main/res/drawable-nodpi/pet_idle_2.webp` | 待机微侧头 |
 | `app/src/main/res/drawable-nodpi/pet_tap_0.webp` | 点击：跳 |
 | `app/src/main/res/drawable-nodpi/pet_tap_1.webp` | 点击：挥手 |
+| `app/src/main/res/drawable-nodpi/pet_sleep_0.webp` | 打盹 |
+| `app/src/main/res/drawable-nodpi/pet_shy_0.webp` | 害羞 |
+
+睡衣帧：`pet_pj_*`；出行帽衫帧：`pet_hd_*`。
 
 要求：竖图、透明底、清晰描边，高度大约 512–1024。不要用糊掉的实拍抠图，小窗上看不清。改完重新 `./gradlew assembleDebug`。
 
@@ -68,4 +81,4 @@ adb install -r releases/float-deskpet-1.0.0-debug.apk
 
 ## 版本
 
-见 `releases/CHANGELOG.md`。当前 `1.0.0`。
+见 `releases/CHANGELOG.md`。当前 `1.1.0`。
