@@ -6,3 +6,4 @@
 - 首次授权引导、设置页（大小 / 透明度 / 始终显示 / 穿透）
 - 杏杏 Q 版帧动画：待机呼吸+眨眼，点击跳跃/挥手，拖完回弹
 - 纯本地，无网络权限；附隐私说明与国产 ROM 省电提示
+- 归档 APK：`releases/float-deskpet-1.0.0-debug.apk`、`releases/float-deskpet-1.0.0-release.apk`
