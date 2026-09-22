@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#C45C26</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#FFD7C2</color>
+    <color name="on_primary_container">#3D1600</color>
+    <color name="secondary">#6E8458</color>
+    <color name="bg">#FFF6EF</color>
+    <color name="surface">#FFFBF7</color>
+    <color name="surface_alt">#FFEFE4</color>
+    <color name="outline">#E7D3C6</color>
+    <color name="text_main">#3B2A22</color>
+    <color name="text_muted">#7A6256</color>
+    <color name="launcher_bg">#F8D4B8</color>
+</resources>

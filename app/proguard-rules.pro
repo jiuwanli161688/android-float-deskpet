@@ -1,0 +1,3 @@
+-keep class com.floatdeskpet.app.** { *; }
+-keepclassmembers class com.floatdeskpet.app.** { *; }
+-dontwarn com.floatdeskpet.app.**
