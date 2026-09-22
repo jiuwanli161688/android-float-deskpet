@@ -40,13 +40,16 @@ class PetSpriteView @JvmOverloads constructor(
         scaleType = ImageView.ScaleType.FIT_CENTER
         adjustViewBounds = true
     }
-    private val bubble = TextView(context).apply {
+    var onBubbleChanged: (() -> Unit)? = null
+
+    val speechBubble = TextView(context).apply {
         setBackgroundResource(R.drawable.bg_bubble)
         setTextColor(context.getColor(R.color.text_main))
         textSize = 12f
         gravity = Gravity.CENTER
         visibility = GONE
         maxLines = 3
+        includeFontPadding = false
         val p = dp(8)
         setPadding(p, dp(6), p, dp(6))
     }
@@ -117,9 +120,10 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     private val hideBubble = Runnable {
-        bubble.animate().alpha(0f).setDuration(180).withEndAction {
-            bubble.visibility = GONE
-            bubble.alpha = 1f
+        speechBubble.animate().alpha(0f).setDuration(180).withEndAction {
+            speechBubble.visibility = GONE
+            speechBubble.alpha = 1f
+            onBubbleChanged?.invoke()
         }.start()
     }
 
@@ -161,12 +165,6 @@ class PetSpriteView @JvmOverloads constructor(
         clipChildren = false
         addView(image, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER))
         addView(
-            bubble,
-            LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
-                topMargin = dp(4)
-            },
-        )
-        addView(
             zzz,
             LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.END).apply {
                 topMargin = dp(18)
@@ -194,7 +192,6 @@ class PetSpriteView @JvmOverloads constructor(
         peeking = value
         if (value) {
             hideMenu()
-            hideBubbleNow()
             pauseAnim()
             image.setImageResource(frames.idle)
         } else if (!paused) {
@@ -234,20 +231,26 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     fun showBubble(text: String, durationMs: Long = 3200L) {
-        if (peeking) return
         handler.removeCallbacks(hideBubble)
-        bubble.animate().cancel()
-        bubble.alpha = 1f
-        bubble.text = text
-        bubble.visibility = VISIBLE
+        speechBubble.animate().cancel()
+        speechBubble.alpha = 1f
+        speechBubble.text = text
+        speechBubble.visibility = VISIBLE
+        onBubbleChanged?.invoke()
         handler.postDelayed(hideBubble, durationMs)
     }
 
     fun hideBubbleNow() {
         handler.removeCallbacks(hideBubble)
-        bubble.animate().cancel()
-        bubble.visibility = GONE
-        bubble.alpha = 1f
+        speechBubble.animate().cancel()
+        speechBubble.visibility = GONE
+        speechBubble.alpha = 1f
+        onBubbleChanged?.invoke()
+    }
+
+    fun setFacingRight(right: Boolean) {
+        val s = if (right) 1f else -1f
+        if (image.scaleX != s) image.scaleX = s
     }
 
     fun playReaction(pose: PetPose) {
