@@ -1,8 +1,17 @@
 # 1.3.2 画面核对
 
+本环境模拟器未能完成开机（ADB 一直 offline），下列图用已入库的造型资源按今日陪伴/轻轻安排版式合成，角色本身与 APK 内 drawable 一致。
+
 ```bash
 adb install -r releases/float-deskpet-1.3.2-debug.apk
 ```
+
+- `docs/screenshots/home-yujie.png`
+- `docs/screenshots/home-luoli.png`
+- `docs/screenshots/home-qingchun.png`
+- `docs/screenshots/panel-yujie.png`
+- `docs/screenshots/panel-luoli.png`
+- `docs/screenshots/panel-qingchun.png`
 
 ## 女风格（必须一眼能分清）
 
