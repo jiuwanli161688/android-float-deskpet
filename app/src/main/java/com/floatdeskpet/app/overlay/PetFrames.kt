@@ -129,7 +129,33 @@ object PetFrames {
                 sleep = R.drawable.pet_m_dashu_blink,
                 shy = R.drawable.pet_m_dashu_idle,
             )
-            else -> null
+            CharacterStyle.WENROU -> FrameSet(
+                idle = R.drawable.pet_m_wenrou_idle,
+                blink = R.drawable.pet_m_wenrou_blink,
+                tilt = R.drawable.pet_m_wenrou_idle,
+                tapJump = R.drawable.pet_m_wenrou_wave,
+                tapWave = R.drawable.pet_m_wenrou_wave,
+                sleep = R.drawable.pet_m_wenrou_blink,
+                shy = R.drawable.pet_m_wenrou_idle,
+            )
+            CharacterStyle.QINGSHUANG -> FrameSet(
+                idle = R.drawable.pet_m_qingshuang_idle,
+                blink = R.drawable.pet_m_qingshuang_blink,
+                tilt = R.drawable.pet_m_qingshuang_idle,
+                tapJump = R.drawable.pet_m_qingshuang_wave,
+                tapWave = R.drawable.pet_m_qingshuang_wave,
+                sleep = R.drawable.pet_m_qingshuang_blink,
+                shy = R.drawable.pet_m_qingshuang_idle,
+            )
+            CharacterStyle.CHENWEN -> FrameSet(
+                idle = R.drawable.pet_m_chenwen_idle,
+                blink = R.drawable.pet_m_chenwen_blink,
+                tilt = R.drawable.pet_m_chenwen_idle,
+                tapJump = R.drawable.pet_m_chenwen_wave,
+                tapWave = R.drawable.pet_m_chenwen_wave,
+                sleep = R.drawable.pet_m_chenwen_blink,
+                shy = R.drawable.pet_m_chenwen_idle,
+            )
         }
     }
 }

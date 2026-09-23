@@ -22,11 +22,10 @@ class CharacterStyleTest {
 
     @Test
     fun dedicatedArtStyles() {
+        assertTrue(CharacterStyle.entries.all { it.hasDedicatedArt })
         assertEquals(
-            setOf("yujie", "luoli", "qingchun"),
-            CharacterStyle.all(false).filter { it.hasDedicatedArt }.map { it.id }.toSet(),
+            setOf("wenrou", "qingshuang", "chenwen", "dashu"),
+            CharacterStyle.all(true).filter { it.hasDedicatedArt }.map { it.id }.toSet(),
         )
-        assertTrue(CharacterStyle.DASHU.hasDedicatedArt)
-        assertTrue(!CharacterStyle.WENROU.hasDedicatedArt)
     }
 }
