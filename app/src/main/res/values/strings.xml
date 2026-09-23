@@ -10,7 +10,7 @@
     <string name="home_mood_ok">%1$s安安静静待着，并不远。</string>
     <string name="home_mood_low">%1$s有点没精神，想被轻轻拍一拍。</string>
     <string name="home_mood_sad">%1$s等了很久，抱一下就好。</string>
-    <string name="menu_fab">打开陪伴菜单</string>
+    <string name="menu_fab">打开轻轻安排</string>
     <string name="panel_title">轻轻安排</string>
     <string name="panel_close">收起</string>
     <string name="panel_profile">去我的小窝</string>

@@ -1,10 +1,15 @@
-# 1.3.4 画面核对
+# 1.3.5 画面核对
 
 本环境模拟器未能完成开机，下列图用已入库造型按今日陪伴版式合成，与 APK 内图一致。
 
 ```bash
-adb install -r releases/float-deskpet-1.3.4-debug.apk
+adb install -r releases/float-deskpet-1.3.5-debug.apk
 ```
+
+## 1.3.5
+
+- `docs/screenshots/home-perm.png`：今日陪伴「去授权」
+- `docs/screenshots/home-fab.png`：右下角轻轻安排新按钮
 
 ## 投喂与有氧
 

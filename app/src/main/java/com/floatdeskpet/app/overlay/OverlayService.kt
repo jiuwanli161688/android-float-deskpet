@@ -95,6 +95,14 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     return START_STICKY
                 }
             }
+            ACTION_SYNC_VIS -> {
+                if (settings.running && OverlayPermission.granted(this)) {
+                    startAsForeground()
+                    ensureWindow()
+                    applyVisibility()
+                    return START_STICKY
+                }
+            }
         }
         if (!OverlayPermission.granted(this) || !settings.running) {
             quit()
@@ -175,7 +183,7 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     private fun applyVisibility() {
-        window?.setVisible(settings.visible)
+        window?.setVisible(OverlayVisibility.shouldShow(settings.visible))
     }
 
     private fun teardownWindow() {
@@ -283,6 +291,12 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         const val ACTION_EXIT = "com.floatdeskpet.app.EXIT"
         const val ACTION_OPEN_FEED = "com.floatdeskpet.app.OPEN_FEED"
         const val ACTION_CARDIO = "com.floatdeskpet.app.CARDIO"
+        const val ACTION_SYNC_VIS = "com.floatdeskpet.app.SYNC_VIS"
+
+        fun syncVisibility(context: Context) {
+            if (!PetSettings.get(context).running) return
+            start(context, ACTION_SYNC_VIS)
+        }
 
         fun start(context: Context, action: String? = null) {
             val app = context.applicationContext

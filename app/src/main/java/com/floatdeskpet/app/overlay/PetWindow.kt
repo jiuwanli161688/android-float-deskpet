@@ -52,7 +52,8 @@ class PetWindow(private val context: Context) : PetActions {
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.CENTER
         flags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         width = WindowManager.LayoutParams.MATCH_PARENT
         height = WindowManager.LayoutParams.MATCH_PARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -606,12 +607,14 @@ class PetWindow(private val context: Context) : PetActions {
             onClose = { hideFeedPanel() },
         )
         try {
+            setPetTouchable(false)
             wm.addView(panel.root, feedParams)
             feedPanel = panel
             feedAttached = true
         } catch (_: Throwable) {
             feedAttached = false
             feedPanel = null
+            setPetTouchable(true)
         }
     }
 
@@ -629,6 +632,16 @@ class PetWindow(private val context: Context) : PetActions {
         }
         feedAttached = false
         feedPanel = null
+        setPetTouchable(true)
+    }
+
+    private fun setPetTouchable(on: Boolean) {
+        params.flags = if (on) {
+            baseFlags()
+        } else {
+            baseFlags() or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        }
+        if (attached) update()
     }
 
     private fun attachBubble() {

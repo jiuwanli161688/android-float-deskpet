@@ -36,6 +36,8 @@ class PetSpriteView @JvmOverloads constructor(
     var onMenuFeed: (() -> Unit)? = null
     var onMenuCardio: (() -> Unit)? = null
     var onMenuSleep: (() -> Unit)? = null
+    var dragEnabled: Boolean = true
+    private var facingRight = true
 
     private val settings = PetSettings.get(context)
     private val image = ImageView(context).apply {
@@ -224,7 +226,18 @@ class PetSpriteView @JvmOverloads constructor(
         val name = settings.displayName()
         contentDescription = name
         image.contentDescription = name
+        restoreFacing()
         refreshMenuLabels()
+    }
+
+    fun embedBubble() {
+        if (speechBubble.parent != null) return
+        addView(
+            speechBubble,
+            LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
+                topMargin = dp(4)
+            },
+        )
     }
 
     fun setWalking(value: Boolean) {
@@ -322,14 +335,38 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     fun setFacingRight(right: Boolean) {
-        val s = if (right) 1f else -1f
-        if (abs(image.scaleX - s) < 0.04f) return
+        if (right == facingRight && abs(image.rotationY) < 1f && abs(image.scaleX) > 0.9f) return
         image.animate().cancel()
+        val density = resources.displayMetrics.density
+        image.cameraDistance = 48f * 160f * density
+        val tilt = if (right) -16f else 16f
+        val slide = if (right) 5f else -5f
         image.animate()
-            .scaleX(s)
-            .setDuration(260L)
-            .setInterpolator(PathInterpolator(0.42f, 0f, 0.58f, 1f))
+            .rotationY(tilt)
+            .translationX(slide)
+            .setDuration(90L)
+            .setInterpolator(PathInterpolator(0.3f, 0f, 0.5f, 1f))
+            .withEndAction {
+                facingRight = right
+                image.scaleX = if (right) 1f else -1f
+                image.scaleY = 1f
+                image.animate()
+                    .rotationY(0f)
+                    .translationX(0f)
+                    .setDuration(130L)
+                    .setInterpolator(PathInterpolator(0.2f, 0f, 0.2f, 1f))
+                    .withEndAction { restoreFacing() }
+                    .start()
+            }
             .start()
+    }
+
+    private fun restoreFacing() {
+        image.rotationY = 0f
+        image.rotationX = 0f
+        image.translationX = 0f
+        image.scaleY = 1f
+        image.scaleX = if (facingRight) 1f else -1f
     }
 
     fun playCardio(durationMs: Long = 4500L, done: (() -> Unit)? = null) {
@@ -468,10 +505,16 @@ class PetSpriteView @JvmOverloads constructor(
                 downY = event.rawY
                 dragging = false
                 suppressDrag = false
-                parent?.requestDisallowInterceptTouchEvent(true)
+                parent?.requestDisallowInterceptTouchEvent(dragEnabled)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
+                if (!dragEnabled) {
+                    if (abs(event.rawX - downX) > slop || abs(event.rawY - downY) > slop) {
+                        parent?.requestDisallowInterceptTouchEvent(false)
+                    }
+                    return true
+                }
                 if (suppressDrag) return true
                 val dx = (event.rawX - lastX).toInt()
                 val dy = (event.rawY - lastY).toInt()

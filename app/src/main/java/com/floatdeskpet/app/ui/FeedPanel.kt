@@ -1,9 +1,12 @@
 package com.floatdeskpet.app.ui
 
 import android.content.Context
+import android.os.SystemClock
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.SoundEffectConstants
 import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
@@ -28,13 +31,14 @@ class FeedPanel(
     private val auth = AuthStore.get(raw)
     private var kind = FoodKind.SNACK
     private var picked: FoodItem? = null
+    private var lastConfirmAt = 0L
 
     init {
         binding = PanelFeedBinding.inflate(LayoutInflater.from(context))
         root = binding.root
-        binding.feedScrim.setOnClickListener { onClose() }
-        binding.btnFeedClose.setOnClickListener { onClose() }
-        binding.btnFeedConfirm.setOnClickListener { confirm() }
+        bindTap(binding.feedScrim) { onClose() }
+        bindTap(binding.btnFeedClose) { onClose() }
+        bindTap(binding.btnFeedConfirm) { confirm() }
         FoodKind.entries.forEach { tab ->
             val chip = Chip(context, null, com.google.android.material.R.attr.chipStyle).apply {
                 text = tab.title
@@ -121,7 +125,37 @@ class FeedPanel(
         }
     }
 
+    private fun bindTap(view: View, block: () -> Unit) {
+        view.isClickable = true
+        view.isFocusable = true
+        view.setOnClickListener { block() }
+        view.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    v.isPressed = true
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    v.isPressed = false
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    v.isPressed = false
+                    if (event.x >= 0 && event.y >= 0 && event.x <= v.width && event.y <= v.height) {
+                        v.playSoundEffect(SoundEffectConstants.CLICK)
+                        block()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
     private fun confirm() {
+        val now = SystemClock.uptimeMillis()
+        if (now - lastConfirmAt < 360L) return
+        lastConfirmAt = now
         val item = picked
         if (item == null) {
             binding.feedHint.text = context.getString(R.string.feed_hint_pick)

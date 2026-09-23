@@ -20,13 +20,15 @@ import com.floatdeskpet.app.auth.AuthStore
 import com.floatdeskpet.app.data.CharacterStyle
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivityMainBinding
-import android.animation.ObjectAnimator
 import android.app.Dialog
-import android.widget.Toast
 import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.overlay.MoodTier
 import com.floatdeskpet.app.overlay.OverlayService
+import com.floatdeskpet.app.overlay.OverlayVisibility
+import com.floatdeskpet.app.overlay.PetDialogue
 import com.floatdeskpet.app.overlay.PetFrames
+import com.floatdeskpet.app.overlay.PetPose
+import com.floatdeskpet.app.overlay.PetSfx
 import com.floatdeskpet.app.overlay.PetStats
 import com.floatdeskpet.app.util.OverlayPermission
 import com.google.android.material.chip.Chip
@@ -39,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private var bindingName = false
     private var panelOpen = false
     private var styleGuard = false
+    private lateinit var sfx: PetSfx
 
     private val overlayLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -66,8 +69,10 @@ class MainActivity : AppCompatActivity() {
         settings = PetSettings.get(this)
         auth = AuthStore.get(this)
         if (!AppFlow.enter(this)) return
+        OverlayVisibility.homeFront = true
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        sfx = PetSfx(this)
         onBackPressedDispatcher.addCallback(this, backToClosePanel)
 
         binding.profileChip.setOnClickListener {
@@ -80,9 +85,9 @@ class MainActivity : AppCompatActivity() {
             closePanel()
             startActivity(Intent(this, ProfileActivity::class.java))
         }
-        binding.panel.btnPermission.setOnClickListener {
-            overlayLauncher.launch(OverlayPermission.settingsIntent(this))
-        }
+        binding.btnPermission.setOnClickListener { requestOverlay() }
+        binding.btnNotif.setOnClickListener { askNotification() }
+        binding.panel.btnPermission.setOnClickListener { requestOverlay() }
         binding.panel.btnNotif.setOnClickListener { askNotification() }
         binding.panel.btnToggle.setOnClickListener { togglePet() }
         binding.panel.privacyLink.setOnClickListener {
@@ -102,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         binding.panel.switchMute.isChecked = settings.muted
         binding.panel.switchTts.isChecked = settings.ttsEnabled
         applyHomeArt()
+        bindHomePet()
 
         binding.panel.sliderSize.addOnChangeListener { _, value, fromUser ->
             settings.sizeDp = value.toInt()
@@ -158,18 +164,40 @@ class MainActivity : AppCompatActivity() {
         bindStyleBlurb()
         insetFab()
         binding.panel.root.post {
-            if (!panelOpen) binding.panel.root.translationX = binding.panel.root.width.toFloat()
+            if (!panelOpen) {
+                binding.panel.root.translationX = binding.panel.root.width.toFloat().coerceAtLeast(1f)
+                parkPanel()
+            }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        OverlayVisibility.homeFront = true
+        OverlayService.syncVisibility(this)
     }
 
     override fun onResume() {
         super.onResume()
         if (!::binding.isInitialized) return
         if (!AppFlow.enter(this)) return
+        OverlayVisibility.homeFront = true
         if (settings.alwaysShow && settings.running && OverlayPermission.granted(this)) {
             OverlayService.start(this)
         }
+        OverlayService.syncVisibility(this)
         refresh()
+    }
+
+    override fun onStop() {
+        OverlayVisibility.homeFront = false
+        OverlayService.syncVisibility(this)
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        if (::sfx.isInitialized) sfx.release()
+        super.onDestroy()
     }
 
     private fun togglePet() {
@@ -181,7 +209,7 @@ class MainActivity : AppCompatActivity() {
         if (!OverlayPermission.granted(this)) {
             pendingStart = true
             OverlayPermission.toastNeed(this)
-            overlayLauncher.launch(OverlayPermission.settingsIntent(this))
+            requestOverlay()
             return
         }
         askNotification()
@@ -249,24 +277,54 @@ class MainActivity : AppCompatActivity() {
         binding.preview.contentDescription = name
     }
 
-    private fun overlayLive(): Boolean {
-        return settings.running && OverlayPermission.granted(this)
+    private fun bindHomePet() {
+        val pet = binding.preview
+        pet.dragEnabled = false
+        pet.embedBubble()
+        pet.onTap = {
+            PetStats.onTap(settings)
+            sfx.tap()
+            pet.showBubble(PetDialogue.tap(settings))
+            bindMoodLine()
+        }
+        pet.onExpressionCycle = { pose ->
+            PetStats.onCycle(settings)
+            sfx.tap()
+            pet.showBubble(PetDialogue.pose(settings, pose))
+            bindMoodLine()
+        }
+        pet.onLongPressAction = { sfx.menu() }
+        pet.onMenuPet = {
+            PetStats.onPet(settings)
+            auth.addHappiness(3)
+            pet.playReaction(PetPose.SHY)
+            pet.showBubble(PetDialogue.pet(settings))
+            sfx.tap()
+            refresh()
+        }
+        pet.onMenuFeed = { openFeedPanel() }
+        pet.onMenuCardio = { startCardio() }
+        pet.onMenuSleep = {
+            PetStats.onSleep(settings)
+            pet.setNapping(true)
+            pet.showBubble(PetDialogue.sleep(settings))
+            refresh()
+        }
     }
 
     private fun openFeedPanel() {
-        if (overlayLive()) {
-            OverlayService.start(this, OverlayService.ACTION_OPEN_FEED)
-            closePanel()
-            return
-        }
+        closePanel()
         val dialog = Dialog(this, android.R.style.Theme_Translucent_NoTitleBar)
         val panel = FeedPanel(
             this,
             onFed = { item ->
                 dialog.dismiss()
                 PetStats.onFed(settings, item.moodBoost)
+                binding.preview.setNapping(false)
+                binding.preview.playReaction(PetPose.HAPPY)
+                binding.preview.showBubble(PetDialogue.feed(settings, item.name))
+                sfx.tap()
                 refresh()
-                Toast.makeText(this, getString(R.string.feed_done_home, item.name), Toast.LENGTH_SHORT).show()
             },
             onClose = { dialog.dismiss() },
         )
@@ -276,24 +334,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startCardio() {
-        if (overlayLive()) {
-            OverlayService.start(this, OverlayService.ACTION_CARDIO)
-            closePanel()
-            return
+        closePanel()
+        binding.preview.playCardio(4500L) {
+            val kcal = FoodCatalog.cardioKcal()
+            PetStats.onCardio(settings)
+            binding.preview.showBubble(PetDialogue.cardio(settings, kcal), 4200L)
+            sfx.tap()
+            refresh()
         }
-        val kcal = FoodCatalog.cardioKcal()
-        PetStats.onCardio(settings)
-        val bounce = ObjectAnimator.ofFloat(binding.preview, "translationY", 0f, -28f, 0f, -18f, 0f)
-        bounce.duration = 900
-        bounce.start()
-        Toast.makeText(this, getString(R.string.cardio_home, kcal), Toast.LENGTH_SHORT).show()
-        refresh()
     }
 
     private fun applyHomeArt() {
+        binding.preview.applyCharacter()
         val frames = PetFrames.of(settings)
-        binding.preview.setImageResource(frames.idle)
-        CharacterStyle.tint(binding.preview, settings)
         binding.panel.stylePreview.setImageResource(frames.idle)
         CharacterStyle.tint(binding.panel.stylePreview, settings)
     }
@@ -393,11 +446,23 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun requestOverlay() {
+        OverlayPermission.open(this, overlayLauncher)
+    }
+
+    private fun parkPanel() {
+        binding.panel.root.visibility = View.GONE
+        binding.panel.root.isClickable = false
+        binding.panel.root.isFocusable = false
+    }
+
     private fun openPanel() {
         panelOpen = true
         binding.scrim.visibility = View.VISIBLE
         binding.scrim.alpha = 0f
         binding.scrim.animate().alpha(1f).setDuration(220).start()
+        binding.panel.root.isClickable = true
+        binding.panel.root.isFocusable = true
         binding.panel.root.visibility = View.VISIBLE
         binding.panel.root.animate().translationX(0f).setDuration(280).start()
         backToClosePanel.isEnabled = true
@@ -412,7 +477,7 @@ class MainActivity : AppCompatActivity() {
             binding.scrim.visibility = View.GONE
         }.start()
         binding.panel.root.animate().translationX(width).setDuration(240).withEndAction {
-            if (!panelOpen) binding.panel.root.visibility = View.INVISIBLE
+            if (!panelOpen) parkPanel()
         }.start()
     }
 
