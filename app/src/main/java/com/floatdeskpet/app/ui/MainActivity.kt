@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         binding.sliderSize.addOnChangeListener { _, value, fromUser ->
             settings.sizeDp = value.toInt()
             applyPreview()
-            if (fromUser) binding.labelSize.text = getString(R.string.label_size, value.toInt())
+            if (fromUser) bindSizeLabel(value.toInt())
         }
         binding.sliderOpacity.addOnChangeListener { _, value, fromUser ->
             settings.opacity = value.toInt()
@@ -108,6 +108,7 @@ class MainActivity : AppCompatActivity() {
             applyPreview()
             refreshHero()
             syncOutfitGroup()
+            bindOutfitDesc()
         }
         binding.inputName.doAfterTextChanged {
             if (bindingName) return@doAfterTextChanged
@@ -124,6 +125,9 @@ class MainActivity : AppCompatActivity() {
             }
             applyPreview()
         }
+        refreshHero()
+        bindSizeLabel(settings.sizeDp)
+        bindOutfitDesc()
     }
 
     override fun onResume() {
@@ -164,7 +168,7 @@ class MainActivity : AppCompatActivity() {
         binding.switchTts.isChecked = settings.ttsEnabled
         binding.sliderSize.value = settings.sizeDp.toFloat()
         binding.sliderOpacity.value = settings.opacity.toFloat()
-        binding.labelSize.text = getString(R.string.label_size, settings.sizeDp)
+        bindSizeLabel(settings.sizeDp)
         binding.labelOpacity.text = getString(R.string.label_opacity, settings.opacity)
         PetStats.applyDecay(settings)
         binding.statsLine.text = getString(
@@ -210,7 +214,6 @@ class MainActivity : AppCompatActivity() {
         lp.width = w
         lp.height = h
         binding.preview.layoutParams = lp
-        binding.outfitPajama.visibility = if (settings.isMale) View.GONE else View.VISIBLE
     }
 
     private fun syncGenderGroup() {
@@ -231,14 +234,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun syncOutfitGroup() {
+        if (settings.isMale && settings.outfit == PetSettings.OUTFIT_PAJAMA) {
+            settings.outfit = PetSettings.OUTFIT_CASUAL
+        }
+        binding.outfitPajama.visibility = if (settings.isMale) View.GONE else View.VISIBLE
+        bindOutfitDesc()
         val id = when (settings.outfit) {
-            PetSettings.OUTFIT_PAJAMA -> if (settings.isMale) R.id.outfitCasual else R.id.outfitPajama
+            PetSettings.OUTFIT_PAJAMA -> R.id.outfitPajama
             PetSettings.OUTFIT_HOODIE -> R.id.outfitHoodie
             else -> R.id.outfitCasual
         }
         if (binding.outfitGroup.checkedButtonId != id) {
             binding.outfitGroup.check(id)
         }
+    }
+
+    private fun bindSizeLabel(size: Int) {
+        val word = when {
+            size < 140 -> getString(R.string.size_small)
+            size > 184 -> getString(R.string.size_large)
+            else -> getString(R.string.size_medium)
+        }
+        binding.labelSize.text = getString(R.string.label_size, word)
+    }
+
+    private fun bindOutfitDesc() {
+        binding.outfitDesc.text = getString(
+            if (settings.isMale) R.string.outfit_desc_m else R.string.outfit_desc_f,
+        )
     }
 
     private fun hasNotif(): Boolean {

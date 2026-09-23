@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.TypedValue
 import android.widget.Toast
+import com.floatdeskpet.app.R
 
 object OverlayPermission {
     fun granted(context: Context): Boolean = Settings.canDrawOverlays(context)
@@ -18,7 +19,7 @@ object OverlayPermission {
     }
 
     fun toastNeed(context: Context) {
-        Toast.makeText(context, "还需要悬浮窗权限，桌宠才能浮在其他应用上面", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.toast_need_overlay), Toast.LENGTH_SHORT).show()
     }
 }
 
