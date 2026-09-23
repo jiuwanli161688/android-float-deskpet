@@ -11,6 +11,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.PathInterpolator
+import com.floatdeskpet.app.auth.AuthStore
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.util.dpSize
 import kotlin.math.abs
@@ -223,6 +224,7 @@ class PetWindow(private val context: Context) : PetActions {
     override fun pet() {
         if (peeking) wakeFromPeek()
         PetStats.onPet(settings)
+        AuthStore.get(context).addHappiness(3)
         view.setNapping(false)
         view.playReaction(PetPose.SHY)
         say(PetDialogue.pet(settings))
@@ -237,6 +239,7 @@ class PetWindow(private val context: Context) : PetActions {
             say(PetDialogue.noSnack(settings))
             return false
         }
+        AuthStore.get(context).addHappiness(6)
         view.setNapping(false)
         view.playReaction(PetPose.HAPPY)
         say(PetDialogue.feed(settings))

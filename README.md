@@ -1,8 +1,8 @@
 # 悬浮桌宠
 
-一只浮在其它应用上面的 Android 桌宠。本地运行，不联网、无账号、无广告。
+一只浮在其它应用上面的 Android 桌宠。本地运行，不联网、没有广告。
 
-首次打开先选男/女，再起名字。女角色默认「杏杏」，男角色默认「阿辰」。可拖动、点一下会跳/眨眼，待机会走路、打盹、躲到屏幕边上探头。打开穿透后触摸会穿过桌宠，方便点底下的微信或浏览器。
+第一次打开先留下账号（只在本机），再选陪伴、起名字。登录后进入「今日陪伴」。女角色风格：御姐 / 萝莉 / 清纯风；男角色：温柔邻家 / 清爽少年 / 沉稳学长。不取名时会从名字册里选一个。可拖动、点一下会跳/眨眼，待机会走路、打盹、躲到屏幕边上探头。打开穿透后触摸会穿过桌宠，方便点底下的微信或浏览器。
 
 ## 环境
 
@@ -19,14 +19,15 @@ sdk.dir=/你的/Android/Sdk
 ```bash
 ./gradlew assembleDebug
 ./gradlew assembleRelease
+./gradlew test
 ```
 
 ## 安装 Debug APK
 
 已归档（也是 CI / 本机产物的副本）：
 
-- Debug：`releases/float-deskpet-1.2.0-debug.apk`
-- Release（debug 签名，可直接装）：`releases/float-deskpet-1.2.0-release.apk`
+- Debug：`releases/float-deskpet-1.3.0-debug.apk`
+- Release（debug 签名，可直接装）：`releases/float-deskpet-1.3.0-release.apk`
 
 Gradle 原始输出：
 
@@ -34,10 +35,10 @@ Gradle 原始输出：
 - `app/build/outputs/apk/release/app-release.apk`
 
 ```bash
-adb install -r releases/float-deskpet-1.2.0-debug.apk
+adb install -r releases/float-deskpet-1.3.0-debug.apk
 ```
 
-装好后打开「悬浮桌宠」→ 选角色和名字 →「去授权」→ 系统页打开「允许显示在其他应用的上层」→ 返回应用点「召唤桌宠」。建议再允许通知，才能用通知栏隐藏或退出。
+装好后打开「悬浮桌宠」→ 登记或走进来 → 选角色和名字 → 右下角小按钮里「请来身边」→ 系统页打开「允许显示在其他应用的上层」。建议再允许通知，才能用通知栏隐藏或退出。
 
 ## 怎么玩
 
@@ -46,7 +47,7 @@ adb install -r releases/float-deskpet-1.2.0-debug.apk
 - 长按：弹出 摸摸 / 喂食 / 睡觉（男生文案略有不同）
 - 甩一下：带惯性滑行，碰到边会弹
 - 待久了：自己走路、打盹，再久一点会半藏在左/右边缘；点探头或摇一摇手机可唤回来
-- 设置里可换角色、改名、换装（女生：日常 / 睡衣 / 出行；男生：日常 / 出行）、静音、气泡语音
+- 右下角菜单可换角色、改名、换风格、换装（女生：日常 / 睡衣 / 出行；男生：日常 / 出行）、静音、气泡语音
 
 ## 国产系统注意
 
@@ -57,7 +58,7 @@ adb install -r releases/float-deskpet-1.2.0-debug.apk
 - OPPO / 一加 / vivo：关电池优化，允许悬浮窗和后台运行。
 - 通用：设置 → 应用 → 电池 → 不优化。
 
-强制停止或通知栏「退出」会卸掉悬浮窗并停服务，不应留下残影。若仍看见残影，把应用从最近任务划掉后再进一次设置页点休息。
+强制停止或通知栏「退出」会卸掉悬浮窗并停服务，不应留下残影。若仍看见残影，把应用从最近任务划掉后再进一次今日陪伴点休息。
 
 ## 以后换角色帧
 
@@ -83,4 +84,4 @@ adb install -r releases/float-deskpet-1.2.0-debug.apk
 
 ## 版本
 
-见 `releases/CHANGELOG.md`。当前 `1.2.0`。
+见 `releases/CHANGELOG.md`。当前 `1.3.0`。

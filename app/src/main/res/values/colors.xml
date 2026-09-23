@@ -12,4 +12,5 @@
     <color name="text_main">#3B2A22</color>
     <color name="text_muted">#7A6256</color>
     <color name="launcher_bg">#F8D4B8</color>
+    <color name="scrim">#66000000</color>
 </resources>

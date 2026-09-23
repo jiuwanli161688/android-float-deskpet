@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.floatdeskpet.app.R
+import com.floatdeskpet.app.data.CharacterStyle
 import com.floatdeskpet.app.data.PetSettings
 import kotlin.math.abs
 import kotlin.math.hypot
@@ -196,6 +197,7 @@ class PetSpriteView @JvmOverloads constructor(
     fun applyCharacter() {
         frames = PetFrames.of(settings)
         image.setImageResource(if (napping) frames.sleep else idleFrame())
+        CharacterStyle.tint(image, settings)
         val name = settings.displayName()
         contentDescription = name
         image.contentDescription = name

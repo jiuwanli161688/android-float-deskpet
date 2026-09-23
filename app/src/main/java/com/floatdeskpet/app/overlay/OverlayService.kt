@@ -128,6 +128,7 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             PetSettings.KEY_Y,
             PetSettings.KEY_OUTFIT,
             PetSettings.KEY_GENDER,
+            PetSettings.KEY_STYLE,
             PetSettings.KEY_NAME,
             PetSettings.KEY_MUTE,
             PetSettings.KEY_TTS,

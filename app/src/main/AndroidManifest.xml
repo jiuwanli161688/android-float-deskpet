@@ -35,15 +35,33 @@
         </activity>
 
         <activity
+            android:name=".ui.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FloatDeskPet"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FloatDeskPet"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".ui.SetupActivity"
             android:exported="false"
             android:theme="@style/Theme.FloatDeskPet"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".ui.ProfileActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.FloatDeskPet" />
+
+        <activity
             android:name=".ui.PrivacyActivity"
             android:exported="false"
-            android:parentActivityName=".ui.MainActivity" />
+            android:parentActivityName=".ui.ProfileActivity" />
 
         <service
             android:name=".overlay.OverlayService"

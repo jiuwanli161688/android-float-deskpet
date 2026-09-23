@@ -52,7 +52,7 @@ class PetSettings private constructor(context: Context) {
         set(value) = prefs.edit().putString(KEY_OUTFIT, value).apply()
 
     var gender: String
-        get() = prefs.getString(KEY_GENDER, GENDER_FEMALE) ?: GENDER_FEMALE
+        get() = prefs.getString(KEY_GENDER, GENDER_MALE) ?: GENDER_MALE
         set(value) = prefs.edit().putString(
             KEY_GENDER,
             if (value == GENDER_MALE) GENDER_MALE else GENDER_FEMALE,
@@ -65,6 +65,14 @@ class PetSettings private constructor(context: Context) {
     var configured: Boolean
         get() = prefs.getBoolean(KEY_CONFIGURED, false)
         set(value) = prefs.edit().putBoolean(KEY_CONFIGURED, value).apply()
+
+    var style: String
+        get() = prefs.getString(KEY_STYLE, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_STYLE, value).apply()
+
+    var namePickIndex: Int
+        get() = prefs.getInt(KEY_NAME_PICK, 0)
+        set(value) = prefs.edit().putInt(KEY_NAME_PICK, value).apply()
 
     var mood: Int
         get() = prefs.getInt(KEY_MOOD, 72)
@@ -92,6 +100,8 @@ class PetSettings private constructor(context: Context) {
 
     val isMale: Boolean get() = gender == GENDER_MALE
 
+    fun resolvedStyle(): CharacterStyle = CharacterStyle.fromId(style, isMale)
+
     fun displayName(): String {
         val n = petName.trim()
         return n.ifEmpty { defaultName(isMale) }
@@ -111,9 +121,35 @@ class PetSettings private constructor(context: Context) {
     fun applySetup(male: Boolean, name: String) {
         gender = if (male) GENDER_MALE else GENDER_FEMALE
         val trimmed = name.trim()
-        petName = trimmed.ifEmpty { defaultName(male) }
-        if (male && outfit == OUTFIT_PAJAMA) outfit = OUTFIT_CASUAL
+        petName = trimmed.ifEmpty { takeDefaultName(male) }
+        val kept = CharacterStyle.fromId(style, male)
+        if (style.isBlank() || kept.id != style) {
+            applyStyle(CharacterStyle.defaultOf(male))
+        } else if (male && outfit == OUTFIT_PAJAMA) {
+            outfit = OUTFIT_CASUAL
+        }
         configured = true
+    }
+
+    fun applyGender(male: Boolean) {
+        val oldDefault = defaultName(!male)
+        gender = if (male) GENDER_MALE else GENDER_FEMALE
+        if (petName.isBlank() || petName == oldDefault || NameBank.pool(!male).contains(petName)) {
+            petName = ""
+        }
+        applyStyle(CharacterStyle.defaultOf(male))
+    }
+
+    fun applyStyle(next: CharacterStyle) {
+        style = next.id
+        outfit = next.suggestedOutfit
+        if (isMale && outfit == OUTFIT_PAJAMA) outfit = OUTFIT_CASUAL
+    }
+
+    fun takeDefaultName(male: Boolean): String {
+        val picked = NameBank.pick(male, namePickIndex)
+        namePickIndex = namePickIndex + 1
+        return picked
     }
 
     companion object {
@@ -133,6 +169,8 @@ class PetSettings private constructor(context: Context) {
         const val KEY_GENDER = "gender"
         const val KEY_NAME = "pet_name"
         const val KEY_CONFIGURED = "configured"
+        const val KEY_STYLE = "character_style"
+        const val KEY_NAME_PICK = "name_pick_index"
         const val KEY_MOOD = "mood"
         const val KEY_AFFECTION = "affection"
         const val KEY_FEED = "feed_count"
@@ -144,8 +182,8 @@ class PetSettings private constructor(context: Context) {
         const val OUTFIT_HOODIE = "hoodie"
         const val GENDER_FEMALE = "female"
         const val GENDER_MALE = "male"
-        const val DEFAULT_FEMALE = "杏杏"
-        const val DEFAULT_MALE = "阿辰"
+        const val DEFAULT_FEMALE = "晚晴"
+        const val DEFAULT_MALE = "予安"
         const val FEED_MAX = 8
         const val FEED_REGEN_MS = 3L * 60L * 60L * 1000L
 

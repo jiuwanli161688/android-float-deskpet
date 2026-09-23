@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">悬浮桌宠</string>
-    <string name="character_name">杏杏</string>
+    <string name="character_name">予安</string>
+
+    <string name="home_title">今日陪伴</string>
+    <string name="home_subtitle">先坐一会儿，有人在窗边等你。</string>
+    <string name="home_menu_hint">右下角那颗小按钮，可以换衣服、叫 TA 过来。</string>
+    <string name="home_mood_happy">%1$s今天心情很好，想被多看看。</string>
+    <string name="home_mood_ok">%1$s安安静静待着，并不远。</string>
+    <string name="home_mood_low">%1$s有点没精神，想被轻轻拍一拍。</string>
+    <string name="home_mood_sad">%1$s等了很久，抱一下就好。</string>
+    <string name="menu_fab">打开陪伴菜单</string>
+    <string name="panel_title">轻轻安排</string>
+    <string name="panel_close">收起</string>
+    <string name="panel_profile">去我的小窝</string>
 
     <string name="hero_title">你好，我是%1$s</string>
     <string name="hero_body">我会以透明小窗浮在微信、浏览器等应用上方陪着你。会自己走走、打盹、躲到屏幕边上探头。不读聊天、不联网、没有广告。</string>
@@ -14,9 +26,9 @@
     <string name="notif_perm_action">允许通知</string>
 
     <string name="status_running">%1$s正在陪伴你</string>
-    <string name="status_stopped">桌宠已休息</string>
-    <string name="status_need_perm">还差一步：先授权悬浮窗</string>
-    <string name="start_pet">召唤桌宠</string>
+    <string name="status_stopped">TA 在休息，想的时候再叫过来</string>
+    <string name="status_need_perm">还差一步：先让 TA 浮到窗边</string>
+    <string name="start_pet">请来身边</string>
     <string name="stop_pet">让她休息</string>
     <string name="stop_pet_m">让他休息</string>
 
@@ -28,9 +40,10 @@
     <string name="label_opacity">透明度 %1$d%%</string>
     <string name="label_character">角色</string>
     <string name="label_name">名字</string>
+    <string name="label_style">更换角色风格</string>
     <string name="gender_female">女</string>
     <string name="gender_male">男</string>
-    <string name="change_character">重新选择角色</string>
+    <string name="change_character">重新认识 TA</string>
     <string name="label_outfit">换装</string>
     <string name="outfit_casual">日常</string>
     <string name="outfit_pajama">睡衣</string>
@@ -38,6 +51,20 @@
     <string name="outfit_desc">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
     <string name="outfit_desc_f">衣服都存在手机里，可随时换。女生有日常、睡衣和出行。</string>
     <string name="outfit_desc_m">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
+
+    <string name="style_yujie">御姐</string>
+    <string name="style_luoli">萝莉</string>
+    <string name="style_qingchun">清纯风</string>
+    <string name="style_wenrou">温柔邻家</string>
+    <string name="style_qingshuang">清爽少年</string>
+    <string name="style_chenwen">沉稳学长</string>
+    <string name="style_yujie_blurb">眉眼淡定一点，像会把热茶先推到你手边。</string>
+    <string name="style_luoli_blurb">软软的、亮一点，说话也轻，像刚晒过的被子。</string>
+    <string name="style_qingchun_blurb">干净浅淡，站在窗边也不抢你的安静。</string>
+    <string name="style_wenrou_blurb">说话不急，像楼下便利店遇见的那个人。</string>
+    <string name="style_qingshuang_blurb">衣领干净，笑起来很浅，像刚下过课。</string>
+    <string name="style_chenwen_blurb">不吵，也不远，像会记得你忘带的伞。</string>
+
     <string name="section_feel">心情</string>
     <string name="stats_line">心情 %1$d · 亲密度 %2$d · 零食 %3$d</string>
     <string name="stats_desc">摸摸、喂食会变好；太久不理会慢慢下降。零食会随时间慢慢补回来。</string>
@@ -59,25 +86,47 @@
     <string name="section_oem">桌宠容易消失时</string>
     <string name="oem_body">部分手机锁屏或切到后台后，会把桌宠清掉。\n\n小米 / 红米：设置 → 应用设置 → 应用管理 → 悬浮桌宠 → 省电策略选「无限制」；同时允许自启动、后台弹出界面。\n\n华为 / 荣耀：设置 → 应用 → 应用启动管理 → 手动管理，打开自启动、关联启动、后台活动。\n\nOPPO / 一加 / vivo：关闭电池优化，允许悬浮窗与后台运行。\n\n通用路径：设置 → 应用 → 悬浮桌宠 → 电池 → 不优化。</string>
     <string name="toast_need_overlay">还需要悬浮窗权限，桌宠才能浮在其他应用上面</string>
-    <string name="privacy_link">隐私说明（纯本地，不联网）</string>
+    <string name="privacy_link">这份陪伴的小心事</string>
 
-    <string name="privacy_title">隐私说明</string>
-    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会创建账号、上传数据或展示广告。\n\n本机保存的内容仅包括：角色性别与名字、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、零食数量、是否穿透、是否始终显示、是否正在运行。这些数据只保存在本机应用内，卸载即清除。\n\n「显示在其他应用上层」只用于画出透明的角色小窗，应用不会读取其它应用的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显示或隐藏 / 退出）。电量提示只读系统电池状态。气泡语音只用系统朗读，不访问云，也不申请网络权限。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
+    <string name="privacy_title">这份陪伴的小心事</string>
+    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会把你的账号、对话或幸福点送到别处，更不会展示广告。\n\n本机保存的内容仅包括：你留下的账号、暗号和称呼、幸福点、角色性别与名字、风格、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、零食数量、是否穿透、是否始终显示、是否正在运行。这些都只留在这台手机上，卸载即清除。\n\n「显示在其他应用上层」只用于画出透明的角色小窗，应用不会读取其它应用的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显示或隐藏 / 退出）。电量提示只读系统电池状态。气泡语音只用系统朗读，不访问云，也不申请网络权限。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
 
-    <string name="setup_gender_title">选一个陪伴</string>
-    <string name="setup_gender_body">选一位陪在身边的伙伴吧，之后还能在设置里改。</string>
-    <string name="setup_female_label">女 · 杏杏</string>
-    <string name="setup_male_label">男 · 阿辰</string>
+    <string name="setup_gender_title">想让谁陪着你</string>
+    <string name="setup_gender_body">先选一位。不确定的话，就从他开始。之后还能改。</string>
+    <string name="setup_female_label">想被她陪着</string>
+    <string name="setup_male_label">想被他陪着</string>
     <string name="setup_next">下一步</string>
-    <string name="setup_name_title">起个名字</string>
-    <string name="setup_name_body">不填的话就叫 %1$s。之后也能改。</string>
+    <string name="setup_gender_skip">先不确定，从他开始</string>
+    <string name="setup_name_title">该怎么叫 TA</string>
+    <string name="setup_name_body">不写也没关系，我会从名字册里轻轻选一个。之后也能改。</string>
     <string name="setup_name_hint">名字</string>
     <string name="setup_done">就这样</string>
-    <string name="setup_skip">用默认名字</string>
+    <string name="setup_skip">先不取名</string>
+
+    <string name="login_title">先回来一下</string>
+    <string name="login_body">用你记下的账号和暗号，我就能认出你。都只留在这台手机上。</string>
+    <string name="login_action">走进来</string>
+    <string name="login_to_register">还没有自己的位置？去留下一点痕迹</string>
+    <string name="register_title">留下一点痕迹</string>
+    <string name="register_body">账号只用字母和数字，像给自己起的小暗号。都不会离开这台手机。</string>
+    <string name="register_action">就这样留下</string>
+    <string name="register_to_login">已经留下过了？回去</string>
+    <string name="auth_account">账号</string>
+    <string name="auth_password">密码</string>
+    <string name="auth_confirm">确认密码</string>
+    <string name="auth_nickname">昵称</string>
+
+    <string name="profile_title">我的小窝</string>
+    <string name="profile_account">账号  %1$s</string>
+    <string name="profile_happiness">幸福点  %1$d</string>
+    <string name="profile_happiness_hint">摸摸、投喂的时候会悄悄多一点。只记在这台手机上。</string>
+    <string name="profile_redo">重新认识 TA</string>
+    <string name="profile_privacy">这份陪伴的小心事</string>
+    <string name="profile_logout">先离开一会儿</string>
 
     <string name="notif_channel">桌宠运行中</string>
     <string name="notif_title">%1$s正在陪伴你</string>
-    <string name="notif_text">点按打开设置 · 可隐藏或退出</string>
+    <string name="notif_text">点按打开今日陪伴 · 可隐藏或退出</string>
     <string name="notif_hide">隐藏</string>
     <string name="notif_show">显示</string>
     <string name="notif_ghost_on">穿透</string>
