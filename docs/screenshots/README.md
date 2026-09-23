@@ -1,10 +1,17 @@
-# 1.3.3 画面核对
+# 1.3.4 画面核对
 
 本环境模拟器未能完成开机，下列图用已入库造型按今日陪伴版式合成，与 APK 内图一致。
 
 ```bash
-adb install -r releases/float-deskpet-1.3.3-debug.apk
+adb install -r releases/float-deskpet-1.3.4-debug.apk
 ```
+
+## 投喂与有氧
+
+- `docs/screenshots/feed-panel.png`：食物面板（小食 / 正餐 / 甜品 / 饮品，标价幸福点）
+- `docs/screenshots/cardio.png`：有氧结束后的卡路里气泡
+
+真机：长按角色 → 投喂 → 选类再喂；菜单「有氧」看几秒运动后气泡。
 
 ## 女风格
 

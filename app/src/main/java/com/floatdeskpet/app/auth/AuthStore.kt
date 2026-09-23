@@ -70,9 +70,18 @@ class AuthStore private constructor(context: Context) {
         saveUser(user.copy(companionReady = true))
     }
 
+    fun happiness(): Int = current()?.happiness ?: 0
+
     fun addHappiness(delta: Int) {
         val user = current() ?: return
         saveUser(user.copy(happiness = (user.happiness + delta).coerceIn(0, 9999)))
+    }
+
+    fun spendHappiness(cost: Int): Boolean {
+        val user = current() ?: return false
+        if (!com.floatdeskpet.app.data.FoodCatalog.canAfford(user.happiness, cost)) return false
+        saveUser(user.copy(happiness = com.floatdeskpet.app.data.FoodCatalog.afterSpend(user.happiness, cost)))
+        return true
     }
 
     private fun users(): Map<String, User> {

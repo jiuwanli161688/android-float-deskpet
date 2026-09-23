@@ -23,10 +23,12 @@ object PetDialogue {
 
     private val petF = listOf("嘿嘿，好舒服～", "再摸摸嘛", "心都要化掉了")
     private val petM = listOf("还不错", "再来一下", "心都要化了")
-    private val feedF = listOf("谢谢你！好好吃～", "零食！最喜欢了", "啊呜，幸福。")
-    private val feedM = listOf("谢了，真好吃", "零食！来得正好", "啊，幸福。")
-    private val noSnackF = listOf("零食吃完啦，过一会儿再来～", "口袋空空的…")
-    private val noSnackM = listOf("零食没了，等会儿再来", "口袋空了…")
+    private val feedF = listOf("谢谢你！好好吃～", "这个味道刚刚好", "啊呜，幸福。")
+    private val feedM = listOf("谢了，真好吃", "来得正好", "啊，幸福。")
+    private val noSnackF = listOf("幸福点还差一点，先摸摸我攒一点？", "口袋空空的…改天再带好吃的来。")
+    private val noSnackM = listOf("幸福点还差一点，先摸摸我攒一点", "改天再带好吃的来")
+    private val cardioF = listOf("哈…好像动掉了 %d 千卡，算个玩笑。", "跳了几下，说是 %d 千卡。别当真。")
+    private val cardioM = listOf("出了点汗，据说 %d 千卡。别信。", "随便跳跳，说是 %d 千卡。")
     private val sleepF = listOf("那我眯一会儿…", "呼…不要吵我哦", "晚安，做个好梦")
     private val sleepM = listOf("那我眯一会儿", "别吵我", "晚安")
     private val peekF = listOf("那我躲边上歇会儿～", "先藏一下下", "有事再叫我呀")
@@ -69,8 +71,12 @@ object PetDialogue {
     }
 
     fun pet(s: PetSettings): String = pick(if (s.isMale) petM else petF)
-    fun feed(s: PetSettings): String = pick(if (s.isMale) feedM else feedF)
+    fun feed(s: PetSettings, food: String = ""): String {
+        val line = pick(if (s.isMale) feedM else feedF)
+        return if (food.isEmpty()) line else "$food，$line"
+    }
     fun noSnack(s: PetSettings): String = pick(if (s.isMale) noSnackM else noSnackF)
+    fun cardio(s: PetSettings, kcal: Int): String = pick(if (s.isMale) cardioM else cardioF).format(kcal)
     fun sleep(s: PetSettings): String = pick(if (s.isMale) sleepM else sleepF)
     fun peek(s: PetSettings): String = pick(if (s.isMale) peekM else peekF)
     fun wake(s: PetSettings): String = pick(if (s.isMale) wakeM else wakeF)

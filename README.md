@@ -26,8 +26,8 @@ sdk.dir=/你的/Android/Sdk
 
 已归档（也是 CI / 本机产物的副本）：
 
-- Debug：`releases/float-deskpet-1.3.3-debug.apk`
-- Release（debug 签名，可直接装）：`releases/float-deskpet-1.3.3-release.apk`
+- Debug：`releases/float-deskpet-1.3.4-debug.apk`
+- Release（debug 签名，可直接装）：`releases/float-deskpet-1.3.4-release.apk`
 
 Gradle 原始输出：
 
@@ -35,7 +35,7 @@ Gradle 原始输出：
 - `app/build/outputs/apk/release/app-release.apk`
 
 ```bash
-adb install -r releases/float-deskpet-1.3.3-debug.apk
+adb install -r releases/float-deskpet-1.3.4-debug.apk
 ```
 
 装好后打开「悬浮桌宠」→ 登记或走进来 → 选角色和名字 → 右下角小按钮里「请来身边」→ 系统页打开「允许显示在其他应用的上层」。建议再允许通知，才能用通知栏隐藏或退出。
@@ -86,4 +86,4 @@ adb install -r releases/float-deskpet-1.3.3-debug.apk
 
 ## 版本
 
-见 `releases/CHANGELOG.md`。当前 `1.3.3`。
+见 `releases/CHANGELOG.md`。当前 `1.3.4`。

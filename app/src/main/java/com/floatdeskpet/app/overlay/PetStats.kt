@@ -6,7 +6,6 @@ enum class MoodTier { HAPPY, OK, LOW, SAD }
 
 object PetStats {
     fun applyDecay(settings: PetSettings) {
-        regenFeed(settings)
         val now = System.currentTimeMillis()
         val last = settings.lastDecayAt
         if (last <= 0L) {
@@ -55,14 +54,16 @@ object PetStats {
         touch(settings)
     }
 
-    fun feed(settings: PetSettings): Boolean {
-        regenFeed(settings)
-        if (settings.feedCount <= 0) return false
-        settings.feedCount = settings.feedCount - 1
-        settings.mood = settings.mood + 14
-        settings.affection = settings.affection + 12
+    fun onFed(settings: PetSettings, moodBoost: Int = 14) {
+        settings.mood = settings.mood + moodBoost
+        settings.affection = settings.affection + (moodBoost / 2).coerceAtLeast(4)
         touch(settings)
-        return true
+    }
+
+    fun onCardio(settings: PetSettings) {
+        settings.mood = settings.mood + 6
+        settings.affection = settings.affection + 3
+        touch(settings)
     }
 
     fun onSleep(settings: PetSettings) {

@@ -12,7 +12,10 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.PathInterpolator
 import com.floatdeskpet.app.auth.AuthStore
+import com.floatdeskpet.app.data.FoodCatalog
+import com.floatdeskpet.app.data.FoodItem
 import com.floatdeskpet.app.data.PetSettings
+import com.floatdeskpet.app.ui.FeedPanel
 import com.floatdeskpet.app.util.dpSize
 import kotlin.math.abs
 import kotlin.math.hypot
@@ -40,8 +43,23 @@ class PetWindow(private val context: Context) : PetActions {
     private var heavyPaused = false
     private var moveAnim: ValueAnimator? = null
     private var bubbleAttached = false
+    private var feedAttached = false
+    private var feedPanel: FeedPanel? = null
     private val autonomy = PetAutonomy()
     var onPeekState: ((Boolean) -> Unit)? = null
+    private val feedParams = WindowManager.LayoutParams().apply {
+        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        format = PixelFormat.TRANSLUCENT
+        gravity = Gravity.CENTER
+        flags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+        width = WindowManager.LayoutParams.MATCH_PARENT
+        height = WindowManager.LayoutParams.MATCH_PARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+    }
 
     private val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -111,7 +129,8 @@ class PetWindow(private val context: Context) : PetActions {
             }
         }
         view.onMenuPet = { pet() }
-        view.onMenuFeed = { feed() }
+        view.onMenuFeed = { openFeed() }
+        view.onMenuCardio = { cardio() }
         view.onMenuSleep = { sleep() }
     }
 
@@ -148,6 +167,7 @@ class PetWindow(private val context: Context) : PetActions {
         moveAnim?.cancel()
         view.hideMenu()
         view.hideBubbleNow()
+        hideFeedPanel()
         detachBubble()
         if (!attached) {
             sfx.release()
@@ -192,6 +212,7 @@ class PetWindow(private val context: Context) : PetActions {
             pauseHeavy()
             view.hideMenu()
             view.hideBubbleNow()
+            hideFeedPanel()
         } else if (attached) {
             resumeHeavy()
             sfx.appear()
@@ -232,20 +253,33 @@ class PetWindow(private val context: Context) : PetActions {
         scheduleIdle()
     }
 
-    override fun feed(): Boolean {
+    override fun openFeed() {
         if (peeking) wakeFromPeek()
-        if (!PetStats.feed(settings)) {
-            view.playReaction(PetPose.SAD)
-            say(PetDialogue.noSnack(settings))
-            return false
+        view.hideMenu()
+        showFeedPanel()
+    }
+
+    override fun cardio() {
+        if (peeking) wakeFromPeek()
+        hideFeedPanel()
+        view.setNapping(false)
+        view.playCardio(4500L) {
+            val kcal = FoodCatalog.cardioKcal()
+            PetStats.onCardio(settings)
+            say(PetDialogue.cardio(settings, kcal), 4200L)
+            sfx.tap()
+            scheduleIdle()
         }
-        AuthStore.get(context).addHappiness(6)
+    }
+
+    fun acceptFeed(item: FoodItem) {
+        if (peeking) wakeFromPeek()
+        PetStats.onFed(settings, item.moodBoost)
         view.setNapping(false)
         view.playReaction(PetPose.HAPPY)
-        say(PetDialogue.feed(settings))
+        say(PetDialogue.feed(settings, item.name))
         sfx.tap()
         scheduleIdle()
-        return true
     }
 
     override fun sleep() {
@@ -556,6 +590,45 @@ class PetWindow(private val context: Context) : PetActions {
         } catch (_: Throwable) {
         }
         syncBubble()
+    }
+
+    private fun showFeedPanel() {
+        if (feedAttached) {
+            feedPanel?.refresh()
+            return
+        }
+        val panel = FeedPanel(
+            context,
+            onFed = { item ->
+                hideFeedPanel()
+                acceptFeed(item)
+            },
+            onClose = { hideFeedPanel() },
+        )
+        try {
+            wm.addView(panel.root, feedParams)
+            feedPanel = panel
+            feedAttached = true
+        } catch (_: Throwable) {
+            feedAttached = false
+            feedPanel = null
+        }
+    }
+
+    fun hideFeedPanel() {
+        val panel = feedPanel ?: return
+        if (feedAttached) {
+            try {
+                wm.removeViewImmediate(panel.root)
+            } catch (_: Throwable) {
+                try {
+                    wm.removeView(panel.root)
+                } catch (_: Throwable) {
+                }
+            }
+        }
+        feedAttached = false
+        feedPanel = null
     }
 
     private fun attachBubble() {

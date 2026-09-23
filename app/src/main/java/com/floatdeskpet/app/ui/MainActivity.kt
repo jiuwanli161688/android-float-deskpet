@@ -20,6 +20,10 @@ import com.floatdeskpet.app.auth.AuthStore
 import com.floatdeskpet.app.data.CharacterStyle
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivityMainBinding
+import android.animation.ObjectAnimator
+import android.app.Dialog
+import android.widget.Toast
+import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.overlay.MoodTier
 import com.floatdeskpet.app.overlay.OverlayService
 import com.floatdeskpet.app.overlay.PetFrames
@@ -88,6 +92,8 @@ class MainActivity : AppCompatActivity() {
             closePanel()
             startActivity(Intent(this, SetupActivity::class.java).putExtra(SetupActivity.EXTRA_EDIT, true))
         }
+        binding.panel.btnFeed.setOnClickListener { openFeedPanel() }
+        binding.panel.btnCardio.setOnClickListener { startCardio() }
 
         binding.panel.sliderSize.value = settings.sizeDp.toFloat()
         binding.panel.sliderOpacity.value = settings.opacity.toFloat()
@@ -206,7 +212,7 @@ class MainActivity : AppCompatActivity() {
             R.string.stats_line,
             settings.mood,
             settings.affection,
-            settings.feedCount,
+            auth.happiness(),
         )
         syncGenderGroup()
         syncNameField()
@@ -241,6 +247,47 @@ class MainActivity : AppCompatActivity() {
         val name = settings.displayName()
         binding.heroTitle.text = getString(R.string.hero_title, name)
         binding.preview.contentDescription = name
+    }
+
+    private fun overlayLive(): Boolean {
+        return settings.running && OverlayPermission.granted(this)
+    }
+
+    private fun openFeedPanel() {
+        if (overlayLive()) {
+            OverlayService.start(this, OverlayService.ACTION_OPEN_FEED)
+            closePanel()
+            return
+        }
+        val dialog = Dialog(this, android.R.style.Theme_Translucent_NoTitleBar)
+        val panel = FeedPanel(
+            this,
+            onFed = { item ->
+                dialog.dismiss()
+                PetStats.onFed(settings, item.moodBoost)
+                refresh()
+                Toast.makeText(this, getString(R.string.feed_done_home, item.name), Toast.LENGTH_SHORT).show()
+            },
+            onClose = { dialog.dismiss() },
+        )
+        dialog.setContentView(panel.root)
+        dialog.setCancelable(true)
+        dialog.show()
+    }
+
+    private fun startCardio() {
+        if (overlayLive()) {
+            OverlayService.start(this, OverlayService.ACTION_CARDIO)
+            closePanel()
+            return
+        }
+        val kcal = FoodCatalog.cardioKcal()
+        PetStats.onCardio(settings)
+        val bounce = ObjectAnimator.ofFloat(binding.preview, "translationY", 0f, -28f, 0f, -18f, 0f)
+        bounce.duration = 900
+        bounce.start()
+        Toast.makeText(this, getString(R.string.cardio_home, kcal), Toast.LENGTH_SHORT).show()
+        refresh()
     }
 
     private fun applyHomeArt() {

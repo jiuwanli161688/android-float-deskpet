@@ -2,7 +2,8 @@ package com.floatdeskpet.app.overlay
 
 interface PetActions {
     fun pet()
-    fun feed(): Boolean
+    fun openFeed()
+    fun cardio()
     fun sleep()
     fun wakeFromPeek()
     fun onShake()

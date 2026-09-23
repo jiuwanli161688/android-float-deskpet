@@ -34,6 +34,7 @@ class PetSpriteView @JvmOverloads constructor(
     var onPeekWake: (() -> Boolean)? = null
     var onMenuPet: (() -> Unit)? = null
     var onMenuFeed: (() -> Unit)? = null
+    var onMenuCardio: (() -> Unit)? = null
     var onMenuSleep: (() -> Unit)? = null
 
     private val settings = PetSettings.get(context)
@@ -93,7 +94,16 @@ class PetSpriteView @JvmOverloads constructor(
     private val cyclePoses = arrayOf(PetPose.HAPPY, PetPose.SHY, PetPose.SLEEP, PetPose.SAD)
     private val chipPet: TextView
     private val chipFeed: TextView
+    private val chipCardio: TextView
     private val chipSleep: TextView
+    private var cardioRunning = false
+    private var cardioDone: (() -> Unit)? = null
+    private val cardioBounce = ObjectAnimator.ofFloat(image, "translationY", 0f, -18f).apply {
+        duration = 280
+        repeatMode = ObjectAnimator.REVERSE
+        repeatCount = ObjectAnimator.INFINITE
+        interpolator = PathInterpolator(0.42f, 0f, 0.58f, 1f)
+    }
 
     private val breath = ObjectAnimator.ofFloat(image, "translationY", 0f, -5.2f).apply {
         duration = 2300
@@ -179,10 +189,23 @@ class PetSpriteView @JvmOverloads constructor(
         )
         chipPet = chip("") { hideMenu(); onMenuPet?.invoke() }
         chipFeed = chip("") { hideMenu(); onMenuFeed?.invoke() }
+        chipCardio = chip("") { hideMenu(); onMenuCardio?.invoke() }
         chipSleep = chip("") { hideMenu(); onMenuSleep?.invoke() }
-        menu.addView(chipPet)
-        menu.addView(chipFeed)
-        menu.addView(chipSleep)
+        val row1 = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        val row2 = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        row1.addView(chipPet)
+        row1.addView(chipFeed)
+        row2.addView(chipCardio)
+        row2.addView(chipSleep)
+        menu.orientation = LinearLayout.VERTICAL
+        menu.addView(row1)
+        menu.addView(row2)
         addView(
             menu,
             LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER).apply {
@@ -259,8 +282,17 @@ class PetSpriteView @JvmOverloads constructor(
     fun pauseAnim() {
         paused = true
         handler.removeCallbacks(tick)
+        handler.removeCallbacks(cardioEnd)
         if (breath.isStarted) breath.cancel()
+        cardioBounce.cancel()
         image.translationY = 0f
+        if (cardioRunning) {
+            cardioRunning = false
+            reacting = false
+            val cb = cardioDone
+            cardioDone = null
+            cb?.invoke()
+        }
     }
 
     fun resumeAnim() {
@@ -298,6 +330,53 @@ class PetSpriteView @JvmOverloads constructor(
             .setDuration(260L)
             .setInterpolator(PathInterpolator(0.42f, 0f, 0.58f, 1f))
             .start()
+    }
+
+    fun playCardio(durationMs: Long = 4500L, done: (() -> Unit)? = null) {
+        if (peeking) return
+        if (napping) setNapping(false)
+        cardioDone = done
+        cardioRunning = true
+        reacting = true
+        index = 0
+        reactSeq = cardioSeq()
+        if (breath.isStarted) breath.cancel()
+        image.translationY = 0f
+        cardioBounce.cancel()
+        cardioBounce.start()
+        handler.removeCallbacks(cardioEnd)
+        handler.postDelayed(cardioEnd, durationMs)
+        handler.removeCallbacks(tick)
+        handler.post(tick)
+    }
+
+    private val cardioEnd = Runnable {
+        cardioBounce.cancel()
+        image.translationY = 0f
+        cardioRunning = false
+        reacting = false
+        index = 0
+        image.setImageResource(idleFrame())
+        restartBreath()
+        val cb = cardioDone
+        cardioDone = null
+        cb?.invoke()
+        if (!paused && !peeking) {
+            handler.removeCallbacks(tick)
+            handler.post(tick)
+        }
+    }
+
+    private fun cardioSeq(): IntArray {
+        val jump = frames.tapJump
+        val wave = frames.tapWave
+        return intArrayOf(
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+        )
     }
 
     fun playReaction(pose: PetPose) {
@@ -453,6 +532,7 @@ class PetSpriteView @JvmOverloads constructor(
     private fun refreshMenuLabels() {
         chipPet.text = context.getString(if (settings.isMale) R.string.menu_pet_m else R.string.menu_pet)
         chipFeed.text = context.getString(if (settings.isMale) R.string.menu_feed_m else R.string.menu_feed)
+        chipCardio.text = context.getString(R.string.menu_cardio)
         chipSleep.text = context.getString(if (settings.isMale) R.string.menu_sleep_m else R.string.menu_sleep)
     }
 

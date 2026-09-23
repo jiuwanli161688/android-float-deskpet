@@ -79,6 +79,22 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
             ACTION_TOGGLE_VISIBLE -> settings.visible = !settings.visible
             ACTION_TOGGLE_GHOST -> settings.passThrough = !settings.passThrough
+            ACTION_OPEN_FEED -> {
+                if (settings.running && OverlayPermission.granted(this)) {
+                    startAsForeground()
+                    ensureWindow()
+                    window?.openFeed()
+                    return START_STICKY
+                }
+            }
+            ACTION_CARDIO -> {
+                if (settings.running && OverlayPermission.granted(this)) {
+                    startAsForeground()
+                    ensureWindow()
+                    window?.cardio()
+                    return START_STICKY
+                }
+            }
         }
         if (!OverlayPermission.granted(this) || !settings.running) {
             quit()
@@ -265,6 +281,8 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         const val ACTION_TOGGLE_VISIBLE = "com.floatdeskpet.app.TOGGLE_VISIBLE"
         const val ACTION_TOGGLE_GHOST = "com.floatdeskpet.app.TOGGLE_GHOST"
         const val ACTION_EXIT = "com.floatdeskpet.app.EXIT"
+        const val ACTION_OPEN_FEED = "com.floatdeskpet.app.OPEN_FEED"
+        const val ACTION_CARDIO = "com.floatdeskpet.app.CARDIO"
 
         fun start(context: Context, action: String? = null) {
             val app = context.applicationContext

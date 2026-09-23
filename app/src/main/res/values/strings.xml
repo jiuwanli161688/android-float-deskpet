@@ -90,8 +90,20 @@
     <string name="guide_4_art">一位准备走到窗边的陪伴</string>
 
     <string name="section_feel">心情</string>
-    <string name="stats_line">心情 %1$d · 亲密度 %2$d · 零食 %3$d</string>
-    <string name="stats_desc">摸摸、喂食会变好；太久不理会慢慢下降。零食会随时间慢慢补回来。</string>
+    <string name="stats_line">心情 %1$d · 亲密度 %2$d · 幸福点 %3$d</string>
+    <string name="stats_desc">摸摸会变好，也会悄悄多一点幸福点。投喂会花掉幸福点。太久不理会，心情会慢慢下来。</string>
+    <string name="action_feed">投喂</string>
+    <string name="action_cardio">动一动</string>
+    <string name="feed_title">带点好吃的来</string>
+    <string name="feed_balance">现在有 %1$d 点幸福</string>
+    <string name="feed_cost">%1$d 点</string>
+    <string name="feed_hint_pick">先点一样，再喂给 TA。</string>
+    <string name="feed_hint_ready">要把%1$s喂过去，花 %2$d 点幸福。</string>
+    <string name="feed_hint_short">幸福点还差一点，喂不了%1$s。先摸摸我，或者改天再来。</string>
+    <string name="feed_confirm">喂给 TA</string>
+    <string name="feed_close">先不喂了</string>
+    <string name="feed_done_home">%1$s收下了，吃得很香。</string>
+    <string name="cardio_home">跳了几下，说是 %1$d 千卡。别当真。</string>
     <string name="section_behavior">行为</string>
     <string name="always_show_title">始终显示</string>
     <string name="always_show_desc">开启后，开机且此前已启动时会自动唤出桌宠。</string>
@@ -106,6 +118,7 @@
     <string name="menu_sleep">睡觉</string>
     <string name="menu_pet_m">摸摸</string>
     <string name="menu_feed_m">投喂</string>
+    <string name="menu_cardio">有氧</string>
     <string name="menu_sleep_m">歇会儿</string>
     <string name="section_oem">桌宠容易消失时</string>
     <string name="oem_body">部分手机锁屏或切到后台后，会把桌宠清掉。\n\n小米 / 红米：设置 → 应用设置 → 应用管理 → 悬浮桌宠 → 省电策略选「无限制」；同时允许自启动、后台弹出界面。\n\n华为 / 荣耀：设置 → 应用 → 应用启动管理 → 手动管理，打开自启动、关联启动、后台活动。\n\nOPPO / 一加 / vivo：关闭电池优化，允许悬浮窗与后台运行。\n\n通用路径：设置 → 应用 → 悬浮桌宠 → 电池 → 不优化。</string>
@@ -113,7 +126,7 @@
     <string name="privacy_link">这份陪伴的小心事</string>
 
     <string name="privacy_title">这份陪伴的小心事</string>
-    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会把你的账号、对话或幸福点送到别处，更不会展示广告。\n\n本机保存的内容仅包括：你留下的账号、暗号和称呼、幸福点、角色性别与名字、风格、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、零食数量、是否穿透、是否始终显示、是否正在运行。这些都只留在这台手机上，卸载即清除。\n\n「显示在其他应用上层」只用于画出透明的角色小窗，应用不会读取其它应用的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显示或隐藏 / 退出）。电量提示只读系统电池状态。气泡语音只用系统朗读，不访问云，也不申请网络权限。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
+    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会把你的账号、对话或幸福点送到别处，更不会展示广告。\n\n本机保存的内容仅包括：你留下的账号、暗号和称呼、幸福点、角色性别与名字、风格、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、是否穿透、是否始终显示、是否正在运行。这些都只留在这台手机上，卸载即清除。\n\n「显示在其他应用上层」只用于画出透明的角色小窗，应用不会读取其它应用的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显示或隐藏 / 退出）。电量提示只读系统电池状态。气泡语音只用系统朗读，不访问云，也不申请网络权限。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
 
     <string name="setup_gender_title">想让谁陪着你</string>
     <string name="setup_gender_body">先选一位。不确定的话，就从他开始。之后还能改。</string>
@@ -143,7 +156,7 @@
     <string name="profile_title">我的小窝</string>
     <string name="profile_account">账号  %1$s</string>
     <string name="profile_happiness">幸福点  %1$d</string>
-    <string name="profile_happiness_hint">摸摸、投喂的时候会悄悄多一点。只记在这台手机上。</string>
+    <string name="profile_happiness_hint">摸摸会悄悄多一点，投喂会花掉一点。只记在这台手机上。</string>
     <string name="profile_redo">重新认识 TA</string>
     <string name="profile_privacy">这份陪伴的小心事</string>
     <string name="profile_logout">先离开一会儿</string>
