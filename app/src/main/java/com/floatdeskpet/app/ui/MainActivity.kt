@@ -61,10 +61,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         settings = PetSettings.get(this)
         auth = AuthStore.get(this)
-        if (!auth.isLoggedIn() || auth.current()?.companionReady != true) {
-            AppFlow.route(this)
-            return
-        }
+        if (!AppFlow.enter(this)) return
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         onBackPressedDispatcher.addCallback(this, backToClosePanel)
@@ -162,10 +159,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (!::binding.isInitialized) return
-        if (!auth.isLoggedIn() || auth.current()?.companionReady != true) {
-            AppFlow.route(this)
-            return
-        }
+        if (!AppFlow.enter(this)) return
         if (settings.alwaysShow && settings.running && OverlayPermission.granted(this)) {
             OverlayService.start(this)
         }
@@ -251,7 +245,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyHomeArt() {
         val frames = PetFrames.of(settings)
-        val res = if (settings.resolvedStyle() == CharacterStyle.CHENWEN) frames.tilt else frames.idle
+        val res = when (settings.resolvedStyle()) {
+            CharacterStyle.CHENWEN -> frames.tilt
+            CharacterStyle.DASHU -> frames.shy
+            else -> frames.idle
+        }
         binding.preview.setImageResource(res)
         CharacterStyle.tint(binding.preview, settings)
     }

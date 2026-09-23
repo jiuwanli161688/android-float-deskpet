@@ -58,12 +58,33 @@
     <string name="style_wenrou">温柔邻家</string>
     <string name="style_qingshuang">清爽少年</string>
     <string name="style_chenwen">沉稳学长</string>
+    <string name="style_dashu">大叔</string>
     <string name="style_yujie_blurb">眉眼淡定一点，像会把热茶先推到你手边。</string>
     <string name="style_luoli_blurb">软软的、亮一点，说话也轻，像刚晒过的被子。</string>
     <string name="style_qingchun_blurb">干净浅淡，站在窗边也不抢你的安静。</string>
     <string name="style_wenrou_blurb">说话不急，像楼下便利店遇见的那个人。</string>
     <string name="style_qingshuang_blurb">衣领干净，笑起来很浅，像刚下过课。</string>
     <string name="style_chenwen_blurb">不吵，也不远，像会记得你忘带的伞。</string>
+    <string name="style_dashu_blurb">声音低一点，像傍晚把外套披过来的人。</string>
+
+    <string name="guide_skip">先跳过</string>
+    <string name="guide_skip_desc">跳过引导</string>
+    <string name="guide_next">下一步</string>
+    <string name="guide_next_desc">下一页</string>
+    <string name="guide_start">开始</string>
+    <string name="guide_start_desc">结束引导，开始留下痕迹</string>
+    <string name="guide_1_title">先坐一会儿</string>
+    <string name="guide_1_body">会有一只小小的人，浮在微信、浏览器上面陪着你。不抢屏幕，也不急着说话。今日陪伴，就是这样慢慢待着。</string>
+    <string name="guide_1_art">一位安静站着的陪伴</string>
+    <string name="guide_2_title">TA 会自己待着</string>
+    <string name="guide_2_body">点一下会跳、会眨眼。待久了会走走、打个盹，还会躲到屏幕边上探头。想叫回来，点一下就好。</string>
+    <string name="guide_2_art">一位轻轻眨眼的陪伴</string>
+    <string name="guide_3_title">都只留在这台手机</string>
+    <string name="guide_3_body">不读聊天、不联网、没有广告。你留下的称呼和幸福点，也只记在这里。卸掉，就散了。</string>
+    <string name="guide_3_art">一位安静陪在窗边的人</string>
+    <string name="guide_4_title">以后让 TA 浮到窗边</string>
+    <string name="guide_4_body">到时候会请你打开「显示在其他应用上层」。现在不用急，先认识一下，再轻轻安排。</string>
+    <string name="guide_4_art">一位准备走到窗边的陪伴</string>
 
     <string name="section_feel">心情</string>
     <string name="stats_line">心情 %1$d · 亲密度 %2$d · 零食 %3$d</string>

@@ -7,6 +7,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import com.floatdeskpet.app.R
 import com.floatdeskpet.app.auth.AuthStore
+import com.floatdeskpet.app.data.GuideStore
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivitySetupBinding
 import com.floatdeskpet.app.overlay.PetFrames
@@ -22,7 +23,7 @@ class SetupActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         settings = PetSettings.get(this)
         auth = AuthStore.get(this)
-        if (!auth.isLoggedIn()) {
+        if (!GuideStore.get(this).completed || !auth.isLoggedIn()) {
             AppFlow.route(this)
             return
         }

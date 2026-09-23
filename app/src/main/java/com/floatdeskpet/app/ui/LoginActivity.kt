@@ -14,10 +14,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = AuthStore.get(this)
-        if (auth.isLoggedIn()) {
-            AppFlow.route(this)
-            return
-        }
+        if (!AppFlow.enter(this)) return
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.btnLogin.setOnClickListener { submit() }

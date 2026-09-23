@@ -15,6 +15,7 @@ enum class CharacterStyle(
     WENROU("wenrou", true, PetSettings.OUTFIT_CASUAL),
     QINGSHUANG("qingshuang", true, PetSettings.OUTFIT_HOODIE),
     CHENWEN("chenwen", true, PetSettings.OUTFIT_CASUAL),
+    DASHU("dashu", true, PetSettings.OUTFIT_HOODIE),
     ;
 
     fun titleRes(): Int = when (this) {
@@ -24,6 +25,7 @@ enum class CharacterStyle(
         WENROU -> com.floatdeskpet.app.R.string.style_wenrou
         QINGSHUANG -> com.floatdeskpet.app.R.string.style_qingshuang
         CHENWEN -> com.floatdeskpet.app.R.string.style_chenwen
+        DASHU -> com.floatdeskpet.app.R.string.style_dashu
     }
 
     fun blurbRes(): Int = when (this) {
@@ -33,6 +35,7 @@ enum class CharacterStyle(
         WENROU -> com.floatdeskpet.app.R.string.style_wenrou_blurb
         QINGSHUANG -> com.floatdeskpet.app.R.string.style_qingshuang_blurb
         CHENWEN -> com.floatdeskpet.app.R.string.style_chenwen_blurb
+        DASHU -> com.floatdeskpet.app.R.string.style_dashu_blurb
     }
 
     fun colorFilter(): ColorMatrixColorFilter {
@@ -73,6 +76,12 @@ enum class CharacterStyle(
                 0.02f, 0.02f, 0.84f, 0f, -10f,
                 0f, 0f, 0f, 1f, 0f,
             )
+            DASHU -> floatArrayOf(
+                1.16f, 0.08f, 0.00f, 0f, 8f,
+                0.05f, 0.86f, 0.02f, 0f, -12f,
+                0.00f, 0.02f, 0.70f, 0f, -20f,
+                0f, 0f, 0f, 1f, 0f,
+            )
         }
         val matrix = ColorMatrix()
         val sat = when (this) {
@@ -82,6 +91,7 @@ enum class CharacterStyle(
             WENROU -> 1.06f
             QINGSHUANG -> 1.04f
             CHENWEN -> 0.78f
+            DASHU -> 0.90f
         }
         matrix.setSaturation(sat)
         matrix.postConcat(ColorMatrix(extra))
