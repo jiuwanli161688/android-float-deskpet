@@ -156,6 +156,15 @@ object PetFrames {
                 sleep = R.drawable.pet_m_chenwen_blink,
                 shy = R.drawable.pet_m_chenwen_idle,
             )
+            CharacterStyle.CHENGGONG -> FrameSet(
+                idle = R.drawable.pet_m_chenggong_idle,
+                blink = R.drawable.pet_m_chenggong_blink,
+                tilt = R.drawable.pet_m_chenggong_idle,
+                tapJump = R.drawable.pet_m_chenggong_wave,
+                tapWave = R.drawable.pet_m_chenggong_wave,
+                sleep = R.drawable.pet_m_chenggong_blink,
+                shy = R.drawable.pet_m_chenggong_idle,
+            )
         }
     }
 }

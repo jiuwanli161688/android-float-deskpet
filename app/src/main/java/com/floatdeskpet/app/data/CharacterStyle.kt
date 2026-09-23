@@ -16,6 +16,7 @@ enum class CharacterStyle(
     QINGSHUANG("qingshuang", true, PetSettings.OUTFIT_HOODIE),
     CHENWEN("chenwen", true, PetSettings.OUTFIT_CASUAL),
     DASHU("dashu", true, PetSettings.OUTFIT_HOODIE),
+    CHENGGONG("chenggong", true, PetSettings.OUTFIT_CASUAL),
     ;
 
     fun titleRes(): Int = when (this) {
@@ -26,6 +27,7 @@ enum class CharacterStyle(
         QINGSHUANG -> com.floatdeskpet.app.R.string.style_qingshuang
         CHENWEN -> com.floatdeskpet.app.R.string.style_chenwen
         DASHU -> com.floatdeskpet.app.R.string.style_dashu
+        CHENGGONG -> com.floatdeskpet.app.R.string.style_chenggong
     }
 
     fun blurbRes(): Int = when (this) {
@@ -36,6 +38,7 @@ enum class CharacterStyle(
         QINGSHUANG -> com.floatdeskpet.app.R.string.style_qingshuang_blurb
         CHENWEN -> com.floatdeskpet.app.R.string.style_chenwen_blurb
         DASHU -> com.floatdeskpet.app.R.string.style_dashu_blurb
+        CHENGGONG -> com.floatdeskpet.app.R.string.style_chenggong_blurb
     }
 
     val hasDedicatedArt: Boolean get() = true
@@ -84,6 +87,12 @@ enum class CharacterStyle(
                 0.00f, 0.02f, 0.70f, 0f, -20f,
                 0f, 0f, 0f, 1f, 0f,
             )
+            CHENGGONG -> floatArrayOf(
+                0.94f, 0.03f, 0.02f, 0f, -4f,
+                0.02f, 0.92f, 0.02f, 0f, -6f,
+                0.01f, 0.02f, 0.90f, 0f, -4f,
+                0f, 0f, 0f, 1f, 0f,
+            )
         }
         val matrix = ColorMatrix()
         val sat = when (this) {
@@ -94,6 +103,7 @@ enum class CharacterStyle(
             QINGSHUANG -> 1.04f
             CHENWEN -> 0.78f
             DASHU -> 0.90f
+            CHENGGONG -> 0.86f
         }
         matrix.setSaturation(sat)
         matrix.postConcat(ColorMatrix(extra))

@@ -26,12 +26,15 @@ adb install -r releases/float-deskpet-1.3.3-debug.apk
 - `docs/screenshots/home-qingshuang.png`
 - `docs/screenshots/home-chenwen.png`
 - `docs/screenshots/home-dashu.png`
+- `docs/screenshots/home-chenggong.png`
+- `docs/screenshots/male-styles-row.png`
 
-今日陪伴 → 右下角 →「轻轻安排」→ 角色选「男」→「更换角色风格」。
+今日陪伴 → 右下角 →「轻轻安排」→ 角色选「男」→「更换角色风格」（应出现「成功人士」芯片）。
 
 | 风格 | id | 应看到 |
 | --- | --- | --- |
-| 温柔邻家 | `wenrou` | 微卷浅发、浅杏针织 |
-| 清爽少年 | `qingshuang` | 利落短发、浅色卫衣 |
-| 沉稳学长 | `chenwen` | 侧分、深蓝外套 |
-| 大叔 | `dashu` | 更壮、短发微胡、橄榄绿衬衫 |
+| 温柔邻家 | `wenrou` | 微卷浅发、浅杏开衫、轻挥手 |
+| 清爽少年 | `qingshuang` | 利落短发、浅蓝卫衣、高挥手 |
+| 沉稳学长 | `chenwen` | 侧分、深蓝背心、抱本 |
+| 大叔 | `dashu` | 更壮、短发微胡、橄榄绿休闲、手叉腰 |
+| 成功人士 | `chenggong` | 深色西装、酒红领带、气场稳 |

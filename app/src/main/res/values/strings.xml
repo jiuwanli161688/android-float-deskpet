@@ -60,6 +60,7 @@
     <string name="style_qingshuang">清爽少年</string>
     <string name="style_chenwen">沉稳学长</string>
     <string name="style_dashu">大叔</string>
+    <string name="style_chenggong">成功人士</string>
     <string name="style_yujie_blurb">眉眼淡定一点，像会把热茶先推到你手边。</string>
     <string name="style_luoli_blurb">软软的、亮一点，说话也轻，像刚晒过的被子。</string>
     <string name="style_qingchun_blurb">干净浅淡，站在窗边也不抢你的安静。</string>
@@ -67,6 +68,7 @@
     <string name="style_qingshuang_blurb">衣领干净，笑起来很浅，像刚下过课。</string>
     <string name="style_chenwen_blurb">不吵，也不远，像会记得你忘带的伞。</string>
     <string name="style_dashu_blurb">声音低一点，像傍晚把外套披过来的人。</string>
+    <string name="style_chenggong_blurb">气场稳、穿得干净，像刚开完会还能陪你坐一会儿。</string>
 
     <string name="guide_skip">先跳过</string>
     <string name="guide_skip_desc">跳过引导</string>
