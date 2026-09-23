@@ -10,7 +10,7 @@ import android.os.SystemClock
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import android.view.animation.DecelerateInterpolator
+import android.view.animation.PathInterpolator
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.util.dpSize
 import kotlin.math.abs
@@ -23,6 +23,7 @@ class PetWindow(private val context: Context) : PetActions {
     private val settings = PetSettings.get(context)
     val view = PetSpriteView(context)
     private val sfx = PetSfx(context)
+    private val voice = PetVoice(context)
     private val handler = Handler(Looper.getMainLooper())
     private var attached = false
     private var peeking = false
@@ -85,14 +86,14 @@ class PetWindow(private val context: Context) : PetActions {
             if (!peeking) {
                 PetStats.onTap(settings)
                 sfx.tap()
-                view.showBubble(PetDialogue.tap(settings.mood))
+                say(PetDialogue.tap(settings))
                 scheduleIdle()
             }
         }
         view.onExpressionCycle = { pose ->
             PetStats.onCycle(settings)
             sfx.tap()
-            view.showBubble(PetDialogue.pose(pose))
+            say(PetDialogue.pose(settings, pose))
             scheduleIdle()
         }
         view.onLongPressAction = {
@@ -114,6 +115,7 @@ class PetWindow(private val context: Context) : PetActions {
     }
 
     fun attach() {
+        voice.ensure()
         if (attached) {
             applySettings()
             return
@@ -134,7 +136,7 @@ class PetWindow(private val context: Context) : PetActions {
         }
         handler.postDelayed({ if (attached) sfx.appear() }, 120L)
         handler.postDelayed({
-            if (attached) view.showBubble(PetDialogue.greeting(), 3800L)
+            if (attached) say(PetDialogue.greeting(settings), 3800L)
         }, 500L)
         scheduleIdle()
     }
@@ -148,6 +150,7 @@ class PetWindow(private val context: Context) : PetActions {
         detachBubble()
         if (!attached) {
             sfx.release()
+            voice.release()
             return
         }
         try {
@@ -161,6 +164,7 @@ class PetWindow(private val context: Context) : PetActions {
         attached = false
         peeking = false
         sfx.release()
+        voice.release()
     }
 
     fun applySettings() {
@@ -173,7 +177,8 @@ class PetWindow(private val context: Context) : PetActions {
         }
         view.alpha = settings.opacity / 100f
         view.isEnabled = !settings.passThrough
-        view.applyOutfit()
+        view.applyCharacter()
+        if (settings.muted || !settings.ttsEnabled) voice.silence() else voice.applyVoice()
         if (attached) {
             if (!peeking) clamp()
             update()
@@ -220,7 +225,7 @@ class PetWindow(private val context: Context) : PetActions {
         PetStats.onPet(settings)
         view.setNapping(false)
         view.playReaction(PetPose.SHY)
-        view.showBubble(PetDialogue.pet())
+        say(PetDialogue.pet(settings))
         sfx.tap()
         scheduleIdle()
     }
@@ -229,12 +234,12 @@ class PetWindow(private val context: Context) : PetActions {
         if (peeking) wakeFromPeek()
         if (!PetStats.feed(settings)) {
             view.playReaction(PetPose.SAD)
-            view.showBubble(PetDialogue.noSnack())
+            say(PetDialogue.noSnack(settings))
             return false
         }
         view.setNapping(false)
         view.playReaction(PetPose.HAPPY)
-        view.showBubble(PetDialogue.feed())
+        say(PetDialogue.feed(settings))
         sfx.tap()
         scheduleIdle()
         return true
@@ -244,7 +249,7 @@ class PetWindow(private val context: Context) : PetActions {
         if (peeking) wakeFromPeek()
         PetStats.onSleep(settings)
         enterNap()
-        view.showBubble(PetDialogue.sleep())
+        say(PetDialogue.sleep(settings))
         scheduleIdle()
     }
 
@@ -258,7 +263,7 @@ class PetWindow(private val context: Context) : PetActions {
             persist()
             update()
             sfx.appear()
-            view.showBubble(PetDialogue.wake())
+            say(PetDialogue.wake(settings))
             view.playReaction(PetPose.WAVE)
             scheduleIdle()
         }
@@ -273,7 +278,7 @@ class PetWindow(private val context: Context) : PetActions {
         if (now - lastBatteryAt < 8 * 60_000L) return
         lastBatteryAt = now
         if (peeking) return
-        view.showBubble(PetDialogue.batteryLow(), 4200L)
+        say(PetDialogue.batteryLow(settings), 4200L)
         view.playReaction(PetPose.SAD)
     }
 
@@ -282,7 +287,7 @@ class PetWindow(private val context: Context) : PetActions {
         if (now - lastBatteryAt < 4 * 60_000L) return
         lastBatteryAt = now
         if (peeking) return
-        view.showBubble(PetDialogue.charging(), 3600L)
+        say(PetDialogue.charging(settings), 3600L)
         view.playReaction(PetPose.HAPPY)
     }
 
@@ -290,6 +295,7 @@ class PetWindow(private val context: Context) : PetActions {
         walking = false
         flinging = false
         autonomy.cancel()
+        view.setWalking(false)
         view.setNapping(true)
     }
 
@@ -312,6 +318,7 @@ class PetWindow(private val context: Context) : PetActions {
         view.setNapping(false)
         walking = true
         flinging = false
+        view.setWalking(true)
         autonomy.begin(params.x, params.y, walkBounds(), SystemClock.uptimeMillis())
         view.setFacingRight(autonomy.lastFaceRight)
         handler.removeCallbacks(motion)
@@ -323,6 +330,7 @@ class PetWindow(private val context: Context) : PetActions {
     private fun finishWalk(nap: Boolean) {
         walking = false
         autonomy.cancel()
+        view.setWalking(false)
         persist()
         if (!canAutonomous()) return
         if (nap) {
@@ -348,7 +356,7 @@ class PetWindow(private val context: Context) : PetActions {
         onPeekState?.invoke(true)
         PetStats.onPeek(settings)
         sfx.hide()
-        view.showBubble(PetDialogue.peek(), 2200L)
+        say(PetDialogue.peek(settings), 2200L)
         animateTo(targetX, params.y)
     }
 
@@ -399,11 +407,11 @@ class PetWindow(private val context: Context) : PetActions {
                 if (now - lastAmbientAt > 50_000L) {
                     lastAmbientAt = now
                     val line = if (Random.nextFloat() < 0.4f) {
-                        PetDialogue.timeOfDay()
+                        PetDialogue.timeOfDay(settings)
                     } else {
-                        PetDialogue.ambient(settings.mood)
+                        PetDialogue.ambient(settings)
                     }
-                    view.showBubble(line, 3400L)
+                    say(line, 3400L)
                 }
             }
             if (attached && !heavyPaused) handler.postDelayed(this, 70_000L)
@@ -474,6 +482,7 @@ class PetWindow(private val context: Context) : PetActions {
         walking = false
         flinging = false
         autonomy.cancel()
+        view.setWalking(false)
         handler.removeCallbacks(motion)
         handler.removeCallbacks(resumeWalk)
         moveAnim?.cancel()
@@ -515,8 +524,8 @@ class PetWindow(private val context: Context) : PetActions {
         val sx = params.x
         val sy = params.y
         val anim = ValueAnimator.ofFloat(0f, 1f)
-        anim.duration = 280L
-        anim.interpolator = DecelerateInterpolator()
+        anim.duration = 460L
+        anim.interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
         anim.addUpdateListener {
             val t = it.animatedValue as Float
             params.x = (sx + (x - sx) * t).toInt()
@@ -530,6 +539,11 @@ class PetWindow(private val context: Context) : PetActions {
         })
         moveAnim = anim
         anim.start()
+    }
+
+    private fun say(text: String, durationMs: Long = 3200L) {
+        view.showBubble(text, durationMs)
+        voice.speak(text)
     }
 
     private fun update() {

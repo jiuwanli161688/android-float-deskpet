@@ -43,9 +43,28 @@ class PetSettings private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_MUTE, false)
         set(value) = prefs.edit().putBoolean(KEY_MUTE, value).apply()
 
+    var ttsEnabled: Boolean
+        get() = prefs.getBoolean(KEY_TTS, true)
+        set(value) = prefs.edit().putBoolean(KEY_TTS, value).apply()
+
     var outfit: String
         get() = prefs.getString(KEY_OUTFIT, OUTFIT_CASUAL) ?: OUTFIT_CASUAL
         set(value) = prefs.edit().putString(KEY_OUTFIT, value).apply()
+
+    var gender: String
+        get() = prefs.getString(KEY_GENDER, GENDER_FEMALE) ?: GENDER_FEMALE
+        set(value) = prefs.edit().putString(
+            KEY_GENDER,
+            if (value == GENDER_MALE) GENDER_MALE else GENDER_FEMALE,
+        ).apply()
+
+    var petName: String
+        get() = prefs.getString(KEY_NAME, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_NAME, value.trim().take(12)).apply()
+
+    var configured: Boolean
+        get() = prefs.getBoolean(KEY_CONFIGURED, false)
+        set(value) = prefs.edit().putBoolean(KEY_CONFIGURED, value).apply()
 
     var mood: Int
         get() = prefs.getInt(KEY_MOOD, 72)
@@ -71,6 +90,32 @@ class PetSettings private constructor(context: Context) {
         get() = prefs.getLong(KEY_FEED_REGEN, 0L)
         set(value) = prefs.edit().putLong(KEY_FEED_REGEN, value).apply()
 
+    val isMale: Boolean get() = gender == GENDER_MALE
+
+    fun displayName(): String {
+        val n = petName.trim()
+        return n.ifEmpty { defaultName(isMale) }
+    }
+
+    fun needsSetup(): Boolean {
+        if (configured) return false
+        if (prefs.contains(KEY_RUNNING) || prefs.contains(KEY_X) || prefs.contains(KEY_OUTFIT)) {
+            if (petName.isBlank()) petName = DEFAULT_FEMALE
+            gender = GENDER_FEMALE
+            configured = true
+            return false
+        }
+        return true
+    }
+
+    fun applySetup(male: Boolean, name: String) {
+        gender = if (male) GENDER_MALE else GENDER_FEMALE
+        val trimmed = name.trim()
+        petName = trimmed.ifEmpty { defaultName(male) }
+        if (male && outfit == OUTFIT_PAJAMA) outfit = OUTFIT_CASUAL
+        configured = true
+    }
+
     companion object {
         const val PREFS = "pet"
         const val UNSET = Int.MIN_VALUE
@@ -83,7 +128,11 @@ class PetSettings private constructor(context: Context) {
         const val KEY_RUNNING = "running"
         const val KEY_VISIBLE = "visible"
         const val KEY_MUTE = "muted"
+        const val KEY_TTS = "tts_enabled"
         const val KEY_OUTFIT = "outfit"
+        const val KEY_GENDER = "gender"
+        const val KEY_NAME = "pet_name"
+        const val KEY_CONFIGURED = "configured"
         const val KEY_MOOD = "mood"
         const val KEY_AFFECTION = "affection"
         const val KEY_FEED = "feed_count"
@@ -93,8 +142,14 @@ class PetSettings private constructor(context: Context) {
         const val OUTFIT_CASUAL = "casual"
         const val OUTFIT_PAJAMA = "pajama"
         const val OUTFIT_HOODIE = "hoodie"
+        const val GENDER_FEMALE = "female"
+        const val GENDER_MALE = "male"
+        const val DEFAULT_FEMALE = "杏杏"
+        const val DEFAULT_MALE = "阿辰"
         const val FEED_MAX = 8
         const val FEED_REGEN_MS = 3L * 60L * 60L * 1000L
+
+        fun defaultName(male: Boolean): String = if (male) DEFAULT_MALE else DEFAULT_FEMALE
 
         @Volatile
         private var instance: PetSettings? = null

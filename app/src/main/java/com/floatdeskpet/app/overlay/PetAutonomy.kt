@@ -3,6 +3,7 @@ package com.floatdeskpet.app.overlay
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.sign
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -13,12 +14,13 @@ internal class PetAutonomy {
 
     private var kind = Kind.DIAGONAL
     private var until = 0L
+    private var startedAt = 0L
     private var vx = 0f
     private var vy = 0f
     private var accX = 0f
     private var accY = 0f
     private var hopPhase = 0f
-    private var hopAmp = 8f
+    private var hopAmp = 6f
     private var hopBaseY = 0
     private var pauseAt = 0L
     private var pausing = false
@@ -33,6 +35,16 @@ internal class PetAutonomy {
     private var destX = 0
     private var destY = 0
     private var seg = 0
+    private var speedMul = 1f
+    private var turning = false
+    private var turnFromVx = 0f
+    private var turnFromVy = 0f
+    private var turnToVx = 0f
+    private var turnToVy = 0f
+    private var turnStart = 0L
+    private var turnMs = 420L
+    private var lastNow = 0L
+    private var cruiseVx = 0f
     var active = false
         private set
 
@@ -42,16 +54,23 @@ internal class PetAutonomy {
         accY = 0f
         pausing = false
         turned = false
+        turning = false
         seg = 0
+        speedMul = 0f
+        startedAt = now
         pick(x, y, b, now)
     }
 
     fun cancel() {
         active = false
+        turning = false
     }
 
     fun step(x: Int, y: Int, b: WalkBounds, now: Long): Triple<Int, Int, Result> {
         if (!active) return Triple(x, y, Result.IDLE)
+        lastNow = now
+        speedMul = envelope(now)
+        tickTurn(now)
         var nx = x
         var ny = y
         when (kind) {
@@ -63,20 +82,21 @@ internal class PetAutonomy {
             }
             Kind.HOP -> {
                 if (now >= until) return finish(nx, ny, nap = false)
-                accX += vx
+                accX += vx * speedMul
                 val dx = accX.toInt()
                 accX -= dx
                 nx += dx
                 if (nx <= b.minX) {
                     nx = b.minX
-                    vx = abs(vx)
+                    beginTurn(abs(vx), 0f, now, 360L)
                 } else if (nx >= b.maxX) {
                     nx = b.maxX
-                    vx = -abs(vx)
+                    beginTurn(-abs(vx), 0f, now, 360L)
                 }
-                hopPhase += 0.30f
-                ny = (hopBaseY + (sin(hopPhase.toDouble()).toFloat() * hopAmp).toInt())
-                    .coerceIn(b.minY, b.maxY)
+                hopPhase += 0.148f
+                val lift = (1f - cos(hopPhase.toDouble()).toFloat()) * 0.5f * hopAmp *
+                    (0.38f + 0.62f * speedMul)
+                ny = (hopBaseY - lift.toInt()).coerceIn(b.minY, b.maxY)
             }
             Kind.PAUSE_TURN -> {
                 if (now >= until) return finish(nx, ny, nap = false)
@@ -84,8 +104,13 @@ internal class PetAutonomy {
                     if (now >= pauseAt) {
                         pausing = false
                         turned = true
-                        vx = -vx
-                        vy = (Random.nextFloat() - 0.5f) * 1.4f
+                        val dir = if (abs(cruiseVx) < 0.2f) {
+                            if (Random.nextBoolean()) 1f else -1f
+                        } else {
+                            -sign(cruiseVx)
+                        }
+                        val nvx = dir * (2.05f + Random.nextFloat() * 0.85f)
+                        beginTurn(nvx, (Random.nextFloat() - 0.5f) * 1.1f, now, 520L)
                     }
                 } else {
                     val moved = applyVel(nx, ny, b, bounce = true)
@@ -93,13 +118,14 @@ internal class PetAutonomy {
                     ny = moved.second
                     if (!turned && now >= pauseAt) {
                         pausing = true
-                        pauseAt = now + (420L..900L).random()
+                        pauseAt = now + (520L..980L).random()
+                        beginTurn(0f, 0f, now, 380L)
                     }
                 }
             }
             Kind.ARC -> {
                 if (now >= until) return finish(nx, ny, nap = false)
-                arcA += arcDa
+                arcA += arcDa * (0.28f + 0.72f * speedMul)
                 nx = (arcCx + cos(arcA) * arcR).toInt().coerceIn(b.minX, b.maxX)
                 ny = (arcCy + sin(arcA) * arcR * 0.52f).toInt().coerceIn(b.minY, b.maxY)
             }
@@ -107,7 +133,7 @@ internal class PetAutonomy {
                 if (now >= until) return finish(nx, ny, nap = false)
                 val tx = if (seg == 0) wayX else destX
                 val ty = if (seg == 0) wayY else destY
-                val reached = seek(nx, ny, tx, ty, 3.1f)
+                val reached = seek(nx, ny, tx, ty, 2.7f)
                 nx = reached.first
                 ny = reached.second
                 if (reached.third) {
@@ -120,7 +146,7 @@ internal class PetAutonomy {
             }
             Kind.TARGET -> {
                 if (now >= until) return finish(nx, ny, nap = Random.nextFloat() < 0.45f)
-                val reached = seek(nx, ny, destX, destY, 3.0f)
+                val reached = seek(nx, ny, destX, destY, 2.6f)
                 nx = reached.first
                 ny = reached.second
                 if (reached.third) return finish(nx, ny, nap = Random.nextFloat() < 0.62f)
@@ -150,35 +176,36 @@ internal class PetAutonomy {
         when {
             roll < 0.22f -> {
                 kind = Kind.DIAGONAL
-                val speed = 2.2f + Random.nextFloat() * 1.5f
+                val speed = 1.85f + Random.nextFloat() * 1.25f
                 val ang = Random.nextFloat() * (Math.PI.toFloat() * 2f)
                 vx = cos(ang) * speed
                 vy = sin(ang) * speed * 0.62f
-                if (abs(vx) < 0.8f) vx = if (vx >= 0f) 1.2f else -1.2f
-                until = now + (7000L..13000L).random()
+                if (abs(vx) < 0.7f) vx = if (vx >= 0f) 1.05f else -1.05f
+                until = now + (7500L..14000L).random()
             }
             roll < 0.40f -> {
                 kind = Kind.HOP
-                vx = (if (Random.nextBoolean()) 1f else -1f) * (2.4f + Random.nextFloat() * 1.3f)
+                vx = (if (Random.nextBoolean()) 1f else -1f) * (1.9f + Random.nextFloat() * 1.05f)
                 vy = 0f
                 hopPhase = 0f
-                hopAmp = (7..14).random().toFloat()
+                hopAmp = (5..9).random().toFloat()
                 val amp = hopAmp.toInt()
                 hopBaseY = if (b.maxY - b.minY < amp * 2) {
                     y.coerceIn(b.minY, b.maxY)
                 } else {
                     y.coerceIn(b.minY + amp, b.maxY - amp)
                 }
-                until = now + (6000L..11000L).random()
+                until = now + (6500L..11500L).random()
             }
             roll < 0.56f -> {
                 kind = Kind.PAUSE_TURN
-                vx = (if (x > (b.minX + b.maxX) / 2) -1f else 1f) * (2.6f + Random.nextFloat() * 1.1f)
-                vy = (Random.nextFloat() - 0.5f) * 0.8f
-                pauseAt = now + (1800L..3600L).random()
+                vx = (if (x > (b.minX + b.maxX) / 2) -1f else 1f) * (2.15f + Random.nextFloat() * 0.95f)
+                cruiseVx = vx
+                vy = (Random.nextFloat() - 0.5f) * 0.7f
+                pauseAt = now + (2000L..3800L).random()
                 pausing = false
                 turned = false
-                until = now + (8000L..13000L).random()
+                until = now + (8500L..14000L).random()
             }
             roll < 0.72f -> {
                 kind = Kind.ARC
@@ -189,8 +216,8 @@ internal class PetAutonomy {
                 arcCx = x.toFloat()
                 arcCy = y.toFloat()
                 arcA = Random.nextFloat() * (Math.PI.toFloat() * 2f)
-                arcDa = (if (Random.nextBoolean()) 1f else -1f) * (0.007f + Random.nextFloat() * 0.007f)
-                until = now + (5000L..8000L).random()
+                arcDa = (if (Random.nextBoolean()) 1f else -1f) * (0.006f + Random.nextFloat() * 0.006f)
+                until = now + (5500L..8500L).random()
             }
             roll < 0.86f -> {
                 kind = Kind.TWO_SEG
@@ -219,8 +246,8 @@ internal class PetAutonomy {
     }
 
     private fun applyVel(x: Int, y: Int, b: WalkBounds, bounce: Boolean): Pair<Int, Int> {
-        accX += vx
-        accY += vy
+        accX += vx * speedMul
+        accY += vy * speedMul
         val dx = accX.toInt()
         val dy = accY.toInt()
         accX -= dx
@@ -230,17 +257,17 @@ internal class PetAutonomy {
         if (bounce) {
             if (nx <= b.minX) {
                 nx = b.minX
-                vx = abs(vx)
+                beginTurn(abs(vx).coerceAtLeast(0.8f), vy, lastNow, 340L)
             } else if (nx >= b.maxX) {
                 nx = b.maxX
-                vx = -abs(vx)
+                beginTurn(-abs(vx).coerceAtLeast(0.8f), vy, lastNow, 340L)
             }
             if (ny <= b.minY) {
                 ny = b.minY
-                vy = abs(vy)
+                beginTurn(vx, abs(vy).coerceAtLeast(0.5f), lastNow, 340L)
             } else if (ny >= b.maxY) {
                 ny = b.maxY
-                vy = -abs(vy)
+                beginTurn(vx, -abs(vy).coerceAtLeast(0.5f), lastNow, 340L)
             }
         } else {
             nx = nx.coerceIn(b.minX, b.maxX)
@@ -253,14 +280,58 @@ internal class PetAutonomy {
         val dx = (tx - x).toFloat()
         val dy = (ty - y).toFloat()
         val dist = hypot(dx, dy)
-        if (dist <= speed + 1.5f) {
+        val arrive = (dist / 92f).coerceIn(0.22f, 1f)
+        val spd = speed * speedMul * arrive
+        if (dist <= speed + 2.2f) {
             vx = dx
             vy = dy
             return Triple(tx, ty, true)
         }
-        vx = dx / dist * speed
-        vy = dy / dist * speed
-        return Triple(x + vx.toInt(), y + vy.toInt(), false)
+        vx = dx / dist * spd
+        vy = dy / dist * spd
+        accX += vx
+        accY += vy
+        val ix = accX.toInt()
+        val iy = accY.toInt()
+        accX -= ix
+        accY -= iy
+        return Triple(x + ix, y + iy, false)
+    }
+
+    private fun envelope(now: Long): Float {
+        val elapsed = (now - startedAt).toFloat()
+        val remain = (until - now).toFloat()
+        val ein = if (elapsed < EASE_IN_MS) smooth(elapsed / EASE_IN_MS) else 1f
+        val eout = when {
+            remain < 0f -> 0f
+            remain < EASE_OUT_MS -> smooth(remain / EASE_OUT_MS)
+            else -> 1f
+        }
+        return (ein * eout).coerceIn(0.06f, 1f)
+    }
+
+    private fun beginTurn(nvx: Float, nvy: Float, now: Long, ms: Long) {
+        turnFromVx = vx
+        turnFromVy = vy
+        turnToVx = nvx
+        turnToVy = nvy
+        turnStart = now
+        turnMs = ms
+        turning = true
+    }
+
+    private fun tickTurn(now: Long) {
+        if (!turning) return
+        val t = ((now - turnStart).toFloat() / turnMs.toFloat()).coerceIn(0f, 1f)
+        val e = smooth(t)
+        vx = turnFromVx + (turnToVx - turnFromVx) * e
+        vy = turnFromVy + (turnToVy - turnFromVy) * e
+        if (t >= 1f) turning = false
+    }
+
+    private fun smooth(t: Float): Float {
+        val x = t.coerceIn(0f, 1f)
+        return x * x * (3f - 2f * x)
     }
 
     private fun randAway(x: Int, y: Int, b: WalkBounds, minDist: Int): Pair<Int, Int> {
@@ -276,7 +347,13 @@ internal class PetAutonomy {
 
     private fun finish(x: Int, y: Int, nap: Boolean): Triple<Int, Int, Result> {
         active = false
+        turning = false
         return Triple(x, y, if (nap) Result.NAP else Result.IDLE)
+    }
+
+    companion object {
+        private const val EASE_IN_MS = 560f
+        private const val EASE_OUT_MS = 720f
     }
 }
 

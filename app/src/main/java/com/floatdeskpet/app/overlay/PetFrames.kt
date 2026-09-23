@@ -31,7 +31,31 @@ data class FrameSet(
 }
 
 object PetFrames {
-    fun of(outfit: String): FrameSet {
+    fun of(settings: PetSettings): FrameSet = of(settings.gender, settings.outfit)
+
+    fun of(gender: String, outfit: String): FrameSet {
+        if (gender == PetSettings.GENDER_MALE) {
+            return when (outfit) {
+                PetSettings.OUTFIT_HOODIE -> FrameSet(
+                    idle = R.drawable.pet_m_hd_idle_0,
+                    blink = R.drawable.pet_m_hd_idle_1,
+                    tilt = R.drawable.pet_m_hd_idle_2,
+                    tapJump = R.drawable.pet_m_hd_tap_0,
+                    tapWave = R.drawable.pet_m_hd_tap_1,
+                    sleep = R.drawable.pet_m_hd_sleep,
+                    shy = R.drawable.pet_m_hd_shy,
+                )
+                else -> FrameSet(
+                    idle = R.drawable.pet_m_idle_0,
+                    blink = R.drawable.pet_m_idle_1,
+                    tilt = R.drawable.pet_m_idle_2,
+                    tapJump = R.drawable.pet_m_tap_0,
+                    tapWave = R.drawable.pet_m_tap_1,
+                    sleep = R.drawable.pet_m_sleep_0,
+                    shy = R.drawable.pet_m_shy_0,
+                )
+            }
+        }
         return when (outfit) {
             PetSettings.OUTFIT_PAJAMA -> FrameSet(
                 idle = R.drawable.pet_pj_idle_0,
