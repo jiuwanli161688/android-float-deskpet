@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doAfterTextChanged
 import com.floatdeskpet.app.R
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivitySetupBinding
@@ -48,6 +49,10 @@ class SetupActivity : AppCompatActivity() {
                 false
             }
         }
+        binding.inputName.doAfterTextChanged {
+            val typed = it?.toString()?.trim().orEmpty()
+            binding.namePreview.contentDescription = typed.ifEmpty { PetSettings.defaultName(male) }
+        }
     }
 
     private fun showNameStep() {
@@ -59,8 +64,10 @@ class SetupActivity : AppCompatActivity() {
         binding.nameHint.text = getString(R.string.setup_name_body, def)
         if (editing && settings.petName.isNotBlank() && settings.petName != def) {
             binding.inputName.setText(settings.petName)
+            binding.namePreview.contentDescription = settings.petName
         } else {
             binding.inputName.setText("")
+            binding.namePreview.contentDescription = def
         }
         binding.inputName.requestFocus()
     }

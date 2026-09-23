@@ -7,7 +7,7 @@
     <string name="hero_body">我会以透明小窗浮在微信、浏览器等应用上方陪着你。会自己走走、打盹、躲到屏幕边上探头。不读聊天、不联网、没有广告。</string>
 
     <string name="perm_title">需要「显示在其他应用上层」</string>
-    <string name="perm_body">这是桌宠能浮在别的应用上面的系统开关，不是通讯录或定位权限。下一步会打开系统页面，请打开「允许显示在其他应用的上层」。我们只用它画出一只角色，不会弹广告、也不会挡支付界面做坏事。</string>
+    <string name="perm_body">这是让桌宠浮在其他应用上面的系统开关，不是通讯录或定位权限。下一步会打开系统页面，请打开「允许显示在其他应用的上层」。我们只用它画出一只角色，不会弹广告，也不会遮挡支付或干扰你的操作。</string>
     <string name="perm_action">去授权</string>
     <string name="perm_done">已授权，可以召唤了</string>
     <string name="notif_perm_hint">建议同时允许通知，方便用通知栏隐藏或退出桌宠。</string>
@@ -21,7 +21,10 @@
     <string name="stop_pet_m">让他休息</string>
 
     <string name="section_look">外观</string>
-    <string name="label_size">大小 %1$d dp</string>
+    <string name="label_size">大小 · %1$s</string>
+    <string name="size_small">偏小</string>
+    <string name="size_medium">适中</string>
+    <string name="size_large">偏大</string>
     <string name="label_opacity">透明度 %1$d%%</string>
     <string name="label_character">角色</string>
     <string name="label_name">名字</string>
@@ -32,7 +35,9 @@
     <string name="outfit_casual">日常</string>
     <string name="outfit_pajama">睡衣</string>
     <string name="outfit_hoodie">出行</string>
-    <string name="outfit_desc">衣服都是本地帧，可随时切换。男生目前有日常和出行两套。</string>
+    <string name="outfit_desc">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
+    <string name="outfit_desc_f">衣服都存在手机里，可随时换。女生有日常、睡衣和出行。</string>
+    <string name="outfit_desc_m">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
     <string name="section_feel">心情</string>
     <string name="stats_line">心情 %1$d · 亲密度 %2$d · 零食 %3$d</string>
     <string name="stats_desc">摸摸、喂食会变好；太久不理会慢慢下降。零食会随时间慢慢补回来。</string>
@@ -44,22 +49,23 @@
     <string name="mute_title">静音</string>
     <string name="mute_desc">关闭短音效和语音。总开关，打开后气泡也不再出声。</string>
     <string name="tts_title">气泡语音</string>
-    <string name="tts_desc">用系统语音读出气泡。会按角色性别选声线；没有对应声音时只调音高。不联网。</string>
+    <string name="tts_desc">用系统朗读读出气泡。会按角色性别选声音；没有对应声线时会调整声音高低。不联网。</string>
     <string name="menu_pet">摸摸</string>
     <string name="menu_feed">喂食</string>
     <string name="menu_sleep">睡觉</string>
     <string name="menu_pet_m">摸摸</string>
     <string name="menu_feed_m">投喂</string>
     <string name="menu_sleep_m">歇会儿</string>
-    <string name="section_oem">省电与国产系统</string>
-    <string name="oem_body">部分手机在锁屏或切到后台后会杀掉前台服务，桌宠会消失。\n\n小米 / 红米：设置 → 应用设置 → 应用管理 → 悬浮桌宠 → 省电策略选「无限制」；同时允许自启动、后台弹出界面。\n\n华为 / 荣耀：设置 → 应用 → 应用启动管理 → 手动管理，打开自启动、关联启动、后台活动。\n\nOPPO / 一加 / vivo：关闭电池优化，允许悬浮窗与后台运行。\n\n通用路径：设置 → 应用 → 悬浮桌宠 → 电池 → 不优化。</string>
+    <string name="section_oem">桌宠容易消失时</string>
+    <string name="oem_body">部分手机锁屏或切到后台后，会把桌宠清掉。\n\n小米 / 红米：设置 → 应用设置 → 应用管理 → 悬浮桌宠 → 省电策略选「无限制」；同时允许自启动、后台弹出界面。\n\n华为 / 荣耀：设置 → 应用 → 应用启动管理 → 手动管理，打开自启动、关联启动、后台活动。\n\nOPPO / 一加 / vivo：关闭电池优化，允许悬浮窗与后台运行。\n\n通用路径：设置 → 应用 → 悬浮桌宠 → 电池 → 不优化。</string>
+    <string name="toast_need_overlay">还需要悬浮窗权限，桌宠才能浮在其他应用上面</string>
     <string name="privacy_link">隐私说明（纯本地，不联网）</string>
 
     <string name="privacy_title">隐私说明</string>
-    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会创建账号、上传数据或展示广告。\n\n本机保存的内容仅包括：角色性别与名字、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、零食数量、是否穿透、是否始终显示、是否正在运行。这些数据存在系统 SharedPreferences，卸载即删。\n\n「显示在其他应用上层」只用于绘制透明角色窗口，应用不会读取其它 App 的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显隐 / 退出）。电量提示只读系统电池状态。气泡语音只用系统 TextToSpeech，不访问云，也不申请网络权限。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
+    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会创建账号、上传数据或展示广告。\n\n本机保存的内容仅包括：角色性别与名字、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、零食数量、是否穿透、是否始终显示、是否正在运行。这些数据只保存在本机应用内，卸载即清除。\n\n「显示在其他应用上层」只用于画出透明的角色小窗，应用不会读取其它应用的界面内容。\n\n通知权限仅用于常驻通知（运行中 / 显示或隐藏 / 退出）。电量提示只读系统电池状态。气泡语音只用系统朗读，不访问云，也不申请网络权限。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
 
     <string name="setup_gender_title">选一个陪伴</string>
-    <string name="setup_gender_body">都是健康向的成年二次元角色，之后还能在设置里改。</string>
+    <string name="setup_gender_body">选一位陪在身边的伙伴吧，之后还能在设置里改。</string>
     <string name="setup_female_label">女 · 杏杏</string>
     <string name="setup_male_label">男 · 阿辰</string>
     <string name="setup_next">下一步</string>

@@ -196,6 +196,9 @@ class PetSpriteView @JvmOverloads constructor(
     fun applyCharacter() {
         frames = PetFrames.of(settings)
         image.setImageResource(if (napping) frames.sleep else idleFrame())
+        val name = settings.displayName()
+        contentDescription = name
+        image.contentDescription = name
         refreshMenuLabels()
     }
 
