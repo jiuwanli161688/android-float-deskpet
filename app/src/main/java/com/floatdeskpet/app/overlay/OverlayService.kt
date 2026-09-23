@@ -17,6 +17,8 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.floatdeskpet.app.R
+import com.floatdeskpet.app.data.CompanionDay
+import com.floatdeskpet.app.data.CompanionMissYou
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.ui.MainActivity
 import com.floatdeskpet.app.util.OverlayPermission
@@ -156,7 +158,11 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             PetSettings.KEY_NAME,
             PetSettings.KEY_MUTE,
             PetSettings.KEY_TTS,
-            -> window?.applySettings()
+            -> {
+                window?.applySettings()
+                if (key == PetSettings.KEY_MUTE) CompanionMissYou.reschedule(this)
+            }
+            PetSettings.KEY_MISS_YOU -> CompanionMissYou.reschedule(this)
             PetSettings.KEY_VISIBLE -> applyVisibility()
             PetSettings.KEY_RUNNING -> if (!settings.running) quit()
         }
@@ -176,6 +182,8 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
         try {
             w.attach()
+            CompanionDay.tick(this)
+            CompanionMissYou.reschedule(this)
             applyVisibility()
         } catch (_: Throwable) {
             quit()

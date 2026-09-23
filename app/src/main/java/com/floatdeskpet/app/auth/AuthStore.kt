@@ -77,6 +77,15 @@ class AuthStore private constructor(context: Context) {
         saveUser(user.copy(happiness = (user.happiness + delta).coerceIn(0, 9999)))
     }
 
+    fun recoverHappiness(amount: Int, cap: Int): Int {
+        val user = current() ?: return 0
+        if (amount <= 0 || user.happiness >= cap) return 0
+        val next = (user.happiness + amount).coerceAtMost(cap)
+        val gained = next - user.happiness
+        if (gained > 0) saveUser(user.copy(happiness = next))
+        return gained
+    }
+
     fun spendHappiness(cost: Int): Boolean {
         val user = current() ?: return false
         if (!com.floatdeskpet.app.data.FoodCatalog.canAfford(user.happiness, cost)) return false

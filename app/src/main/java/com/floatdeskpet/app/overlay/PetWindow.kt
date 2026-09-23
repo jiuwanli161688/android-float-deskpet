@@ -13,6 +13,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.PathInterpolator
 import com.floatdeskpet.app.auth.AuthStore
+import com.floatdeskpet.app.data.CompanionDay
 import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.data.FoodItem
 import com.floatdeskpet.app.data.PetSettings
@@ -178,6 +179,7 @@ class PetWindow(private val context: Context) : PetActions {
             attached = false
             throw t
         }
+        CompanionDay.tick(context)
         handler.postDelayed({ if (attached) sfx.appear() }, 120L)
         handler.postDelayed({
             if (attached) say(PetDialogue.greeting(settings), 3800L)
@@ -273,7 +275,9 @@ class PetWindow(private val context: Context) : PetActions {
         hideActionMenu()
         if (peeking) wakeFromPeek()
         PetStats.onPet(settings)
-        AuthStore.get(context).addHappiness(3)
+        val store = AuthStore.get(context)
+        store.addHappiness(3)
+        CompanionDay.notePet(settings, store)
         view.setNapping(false)
         view.playReaction(PetPose.SHY)
         say(PetDialogue.pet(settings))
@@ -296,6 +300,7 @@ class PetWindow(private val context: Context) : PetActions {
         view.playCardio(4500L) {
             val kcal = FoodCatalog.cardioKcal()
             PetStats.onCardio(settings)
+            CompanionDay.noteCardio(settings, AuthStore.get(context))
             say(PetDialogue.cardio(settings, kcal), 4200L)
             sfx.tap()
             scheduleIdle()
@@ -305,6 +310,7 @@ class PetWindow(private val context: Context) : PetActions {
     fun acceptFeed(item: FoodItem) {
         if (peeking) wakeFromPeek()
         PetStats.onFed(settings, item.moodBoost)
+        CompanionDay.noteFeed(settings, AuthStore.get(context))
         view.setNapping(false)
         view.playReaction(PetPose.HAPPY)
         say(PetDialogue.feed(settings, item.name))
@@ -668,13 +674,17 @@ class PetWindow(private val context: Context) : PetActions {
 
     private fun openHome() {
         hideActionMenu()
-        val intent = Intent(context, MainActivity::class.java)
-            .addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP,
-            )
-        context.startActivity(intent)
+        view.animate().cancel()
+        view.animate().alpha(0.15f).setDuration(180).withEndAction {
+            val intent = Intent(context, MainActivity::class.java)
+                .addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                )
+            context.startActivity(intent)
+            view.alpha = settings.opacity / 100f
+        }.start()
     }
 
     private fun showActionMenu() {

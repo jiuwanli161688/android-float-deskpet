@@ -108,6 +108,37 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/itemHome"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_overlay_menu_home"
+        android:clickable="true"
+        android:contentDescription="@string/menu_home_desc"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_overlay_home" />
+
+        <TextView
+            android:id="@+id/labelHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@string/menu_home"
+            android:textColor="@color/on_primary_container"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/itemSleep"
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -135,57 +166,5 @@
             android:textColor="@color/text_main"
             android:textSize="16sp"
             android:textStyle="bold" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginHorizontal="6dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/bg_overlay_menu_divider" />
-
-    <LinearLayout
-        android:id="@+id/itemHome"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@drawable/bg_overlay_menu_home"
-        android:clickable="true"
-        android:contentDescription="@string/menu_home_desc"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp">
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:contentDescription="@null"
-            android:importantForAccessibility="no"
-            android:src="@drawable/ic_overlay_home" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/labelHome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/menu_home"
-                android:textColor="@color/on_primary_container"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/labelHomeDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/menu_home_desc"
-                android:textColor="@color/on_primary_container"
-                android:textSize="12sp" />
-        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

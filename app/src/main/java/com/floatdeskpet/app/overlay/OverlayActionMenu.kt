@@ -51,7 +51,7 @@ class OverlayActionMenu(
         val male = settings.isMale
         labelPet.text = root.context.getString(if (male) R.string.menu_pet_m else R.string.menu_pet)
         labelFeed.text = root.context.getString(if (male) R.string.menu_feed_m else R.string.menu_feed)
-        labelCardio.text = root.context.getString(R.string.menu_cardio)
+        labelCardio.text = root.context.getString(R.string.action_cardio)
         labelSleep.text = root.context.getString(if (male) R.string.menu_sleep_m else R.string.menu_sleep)
         labelHome.text = root.context.getString(R.string.menu_home)
     }

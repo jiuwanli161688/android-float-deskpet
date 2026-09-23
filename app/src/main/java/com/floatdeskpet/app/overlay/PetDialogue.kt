@@ -1,18 +1,29 @@
 package com.floatdeskpet.app.overlay
 
+import com.floatdeskpet.app.data.BondStage
+import com.floatdeskpet.app.data.CompanionBond
+import com.floatdeskpet.app.data.CompanionDay
 import com.floatdeskpet.app.data.PetSettings
 import java.util.Calendar
+import kotlin.random.Random
 
 object PetDialogue {
-    private val morningF = listOf("早上好呀～", "新的一天，一起加油哦", "早饭记得吃～")
-    private val noonF = listOf("午饭吃了吗？", "午安～稍微歇一会儿吧", "太阳好暖呀")
-    private val eveningF = listOf("晚上好", "今天辛苦啦", "要不要喝杯热的？")
-    private val nightF = listOf("好晚了呢", "要早点睡哦", "我陪你再待一会儿")
+    private val morningF = listOf("早上好呀～", "新的一天，一起加油哦", "早饭记得吃～", "窗边的光好浅")
+    private val noonF = listOf("午饭吃了吗？", "午安～稍微歇一会儿吧", "太阳好暖呀", "下午也慢慢来")
+    private val eveningF = listOf("晚上好", "今天辛苦啦", "要不要喝杯热的？", "天色软下来了")
+    private val nightF = listOf("好晚了呢", "要早点睡哦", "我陪你再待一会儿", "夜里也有人在")
 
-    private val morningM = listOf("早啊", "新的一天，我陪你", "早饭别忘了")
-    private val noonM = listOf("午饭吃了吗", "午安，歇一会儿", "太阳挺好")
-    private val eveningM = listOf("晚上了", "今天辛苦了", "要不要喝点热的")
-    private val nightM = listOf("有点晚了", "早点睡吧", "我再陪你一会儿")
+    private val morningM = listOf("早啊", "新的一天，我陪你", "早饭别忘了", "光刚好")
+    private val noonM = listOf("午饭吃了吗", "午安，歇一会儿", "太阳挺好", "不急")
+    private val eveningM = listOf("晚上了", "今天辛苦了", "要不要喝点热的", "天暗下来了")
+    private val nightM = listOf("有点晚了", "早点睡吧", "我再陪你一会儿", "夜也安静")
+
+    private val stageWarmF = listOf("比刚认识时，更熟一点了", "我会记得你回来的样子")
+    private val stageTacitF = listOf("不用多说，我懂", "这样待着就刚好")
+    private val stageBondF = listOf("有你在，心就稳", "这段日子，我收着")
+    private val stageWarmM = listOf("比刚见面，近一点了", "你回来，我知道")
+    private val stageTacitM = listOf("不用多讲", "这样就好")
+    private val stageBondM = listOf("有你在就够", "这些日子我记得")
 
     private val tapHappyF = listOf("欸嘿～", "被发现啦", "嘿嘿，又点我")
     private val tapOkF = listOf("嗯？", "我在呢", "怎么啦～")
@@ -58,16 +69,30 @@ object PetDialogue {
 
     fun greeting(s: PetSettings): String = pick(slotPool(s)) + " " + named(s, if (s.isMale) appearM else appearF)
 
-    fun timeOfDay(s: PetSettings): String = pick(slotPool(s))
+    fun timeOfDay(s: PetSettings): String = pick(rhythmPool(s))
+
+    fun todayLine(s: PetSettings): String = pickDaily(s, rhythmPool(s))
+
+    fun nextTodayLine(s: PetSettings, current: String): String {
+        val pool = rhythmPool(s)
+        if (pool.isEmpty()) return current
+        val rest = pool.filter { it != current }
+        return if (rest.isEmpty()) pick(pool) else pick(rest)
+    }
 
     fun tap(s: PetSettings): String {
-        return pick(
+        val base = pick(
             when (PetStats.tier(s.mood)) {
                 MoodTier.HAPPY -> if (s.isMale) tapHappyM else tapHappyF
                 MoodTier.OK -> if (s.isMale) tapOkM else tapOkF
                 MoodTier.LOW, MoodTier.SAD -> if (s.isMale) tapLowM else tapLowF
             },
         )
+        return if (CompanionBond.richer(s) && Random.nextFloat() < 0.4f) {
+            pick(slotPool(s)) + "，" + base
+        } else {
+            base
+        }
     }
 
     fun pet(s: PetSettings): String = pick(if (s.isMale) petM else petF)
@@ -96,6 +121,7 @@ object PetDialogue {
     }
 
     fun ambient(s: PetSettings): String {
+        if (Random.nextFloat() < 0.7f) return timeOfDay(s)
         return pick(
             when (PetStats.tier(s.mood)) {
                 MoodTier.HAPPY -> if (s.isMale) ambientHappyM else ambientHappyF
@@ -105,18 +131,51 @@ object PetDialogue {
         )
     }
 
+    fun streak(s: PetSettings, days: Int): String {
+        return if (s.isMale) {
+            "连续 %d 天了，我都在。".format(days)
+        } else {
+            "已经一起过了 %d 天呢。".format(days)
+        }
+    }
+
+    private fun rhythmPool(s: PetSettings): List<String> {
+        return slotPool(s) + stageExtra(s) + styleExtra(s)
+    }
+
     private fun slotPool(s: PetSettings): List<String> {
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val male = s.isMale
         return when (hour) {
             in 6..10 -> if (male) morningM else morningF
-            in 11..13 -> if (male) noonM else noonF
-            in 17..20 -> if (male) eveningM else eveningF
-            else -> if (hour in 14..16) {
-                if (male) noonM else noonF
-            } else {
-                if (male) nightM else nightF
-            }
+            in 11..16 -> if (male) noonM else noonF
+            in 17..21 -> if (male) eveningM else eveningF
+            else -> if (male) nightM else nightF
+        }
+    }
+
+    private fun stageExtra(s: PetSettings): List<String> {
+        val male = s.isMale
+        return when (CompanionBond.stage(s)) {
+            BondStage.FIRST -> emptyList()
+            BondStage.WARM -> if (male) stageWarmM else stageWarmF
+            BondStage.TACIT -> if (male) stageTacitM else stageTacitF
+            BondStage.BOND -> if (male) stageBondM else stageBondF
+        }
+    }
+
+    private fun styleExtra(s: PetSettings): List<String> {
+        if (!CompanionBond.richer(s)) return emptyList()
+        return when (s.resolvedStyle().id) {
+            "yujie" -> listOf(if (s.isMale) "茶还温着" else "茶先给你")
+            "luoli" -> listOf(if (s.isMale) "软软待着" else "轻轻挨着你")
+            "qingchun" -> listOf("窗边刚刚好")
+            "wenrou" -> listOf(if (s.isMale) "不急，我在" else "不急，我在呢")
+            "qingshuang" -> listOf("风也干净")
+            "chenwen" -> listOf("伞还在原处")
+            "dashu" -> listOf("外套给你")
+            "chenggong" -> listOf("开完会，也坐一会儿")
+            else -> emptyList()
         }
     }
 
@@ -125,4 +184,11 @@ object PetDialogue {
     }
 
     private fun pick(pool: List<String>): String = pool.random()
+
+    private fun pickDaily(s: PetSettings, pool: List<String>): String {
+        if (pool.isEmpty()) return ""
+        val seed = CompanionDay.todayKey() * 31 + s.displayName().hashCode()
+        val i = (seed and 0x7fffffff) % pool.size
+        return pool[i]
+    }
 }

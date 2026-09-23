@@ -82,6 +82,15 @@
             android:exported="false" />
 
         <receiver
+            android:name=".data.MissYouReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.floatdeskpet.app.MISS_YOU" />
+                <action android:name="com.floatdeskpet.app.MISS_YOU_OFF" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
             android:name=".boot.BootReceiver"
             android:exported="true">
             <intent-filter>

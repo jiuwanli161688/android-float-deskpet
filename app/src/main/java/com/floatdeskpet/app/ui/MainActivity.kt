@@ -17,12 +17,15 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.floatdeskpet.app.R
 import com.floatdeskpet.app.auth.AuthStore
+import com.floatdeskpet.app.data.BondStage
 import com.floatdeskpet.app.data.CharacterStyle
+import com.floatdeskpet.app.data.CompanionBond
+import com.floatdeskpet.app.data.CompanionDay
+import com.floatdeskpet.app.data.CompanionMissYou
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivityMainBinding
 import android.app.Dialog
 import com.floatdeskpet.app.data.FoodCatalog
-import com.floatdeskpet.app.overlay.MoodTier
 import com.floatdeskpet.app.overlay.OverlayService
 import com.floatdeskpet.app.overlay.OverlayVisibility
 import com.floatdeskpet.app.overlay.PetDialogue
@@ -99,6 +102,11 @@ class MainActivity : AppCompatActivity() {
         }
         binding.panel.btnFeed.setOnClickListener { openFeedPanel() }
         binding.panel.btnCardio.setOnClickListener { startCardio() }
+        binding.panel.btnRest.setOnClickListener { togglePet() }
+        binding.todayCard.setOnClickListener { refreshTodayLine() }
+        binding.chipGoalPet.setOnClickListener { doHomePet() }
+        binding.chipGoalFeed.setOnClickListener { openFeedPanel() }
+        binding.chipGoalCardio.setOnClickListener { startCardio() }
 
         binding.panel.sliderSize.value = settings.sizeDp.toFloat()
         binding.panel.sliderOpacity.value = settings.opacity.toFloat()
@@ -106,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         binding.panel.switchGhost.isChecked = settings.passThrough
         binding.panel.switchMute.isChecked = settings.muted
         binding.panel.switchTts.isChecked = settings.ttsEnabled
+        binding.panel.switchMissYou.isChecked = settings.missYou
         applyHomeArt()
         bindHomePet()
 
@@ -128,6 +137,11 @@ class MainActivity : AppCompatActivity() {
         }
         binding.panel.switchTts.setOnCheckedChangeListener { _, checked ->
             settings.ttsEnabled = checked
+        }
+        binding.panel.switchMissYou.setOnCheckedChangeListener { _, checked ->
+            settings.missYou = checked
+            if (checked) askNotification()
+            CompanionMissYou.reschedule(this)
         }
         binding.panel.genderGroup.addOnButtonCheckedListener { _, id, checked ->
             if (!checked) return@addOnButtonCheckedListener
@@ -186,7 +200,12 @@ class MainActivity : AppCompatActivity() {
             OverlayService.start(this)
         }
         OverlayService.syncVisibility(this)
+        val tick = CompanionDay.tick(this)
         refresh()
+        easeHomeIn()
+        if (tick.celebrate > 0) {
+            binding.preview.showBubble(PetDialogue.streak(settings, tick.celebrate), 1400L)
+        }
     }
 
     override fun onStop() {
@@ -231,6 +250,7 @@ class MainActivity : AppCompatActivity() {
         binding.panel.switchGhost.isChecked = settings.passThrough
         binding.panel.switchMute.isChecked = settings.muted
         binding.panel.switchTts.isChecked = settings.ttsEnabled
+        binding.panel.switchMissYou.isChecked = settings.missYou
         binding.panel.sliderSize.value = settings.sizeDp.toFloat()
         binding.panel.sliderOpacity.value = settings.opacity.toFloat()
         bindSizeLabel(settings.sizeDp)
@@ -255,20 +275,26 @@ class MainActivity : AppCompatActivity() {
             !granted -> {
                 binding.status.text = getString(R.string.status_need_perm)
                 binding.panel.status.text = getString(R.string.status_need_perm)
+                binding.panel.btnToggle.visibility = View.VISIBLE
                 binding.panel.btnToggle.text = getString(R.string.start_pet)
+                binding.panel.btnRest.visibility = View.GONE
             }
             settings.running -> {
                 binding.status.text = getString(R.string.status_running, name)
                 binding.panel.status.text = getString(R.string.status_running, name)
-                binding.panel.btnToggle.text = getString(if (settings.isMale) R.string.stop_pet_m else R.string.stop_pet)
+                binding.panel.btnToggle.visibility = View.GONE
+                binding.panel.btnRest.visibility = View.VISIBLE
+                binding.panel.btnRest.text = getString(if (settings.isMale) R.string.stop_pet_m else R.string.stop_pet)
             }
             else -> {
                 binding.status.text = getString(R.string.status_stopped)
                 binding.panel.status.text = getString(R.string.status_stopped)
+                binding.panel.btnToggle.visibility = View.VISIBLE
                 binding.panel.btnToggle.text = getString(R.string.start_pet)
+                binding.panel.btnRest.visibility = View.GONE
             }
         }
-        bindMoodLine()
+        bindDailyCard()
     }
 
     private fun refreshHero() {
@@ -285,23 +311,16 @@ class MainActivity : AppCompatActivity() {
             PetStats.onTap(settings)
             sfx.tap()
             pet.showBubble(PetDialogue.tap(settings))
-            bindMoodLine()
+            bindDailyCard()
         }
         pet.onExpressionCycle = { pose ->
             PetStats.onCycle(settings)
             sfx.tap()
             pet.showBubble(PetDialogue.pose(settings, pose))
-            bindMoodLine()
+            bindDailyCard()
         }
         pet.onLongPressAction = { sfx.menu() }
-        pet.onMenuPet = {
-            PetStats.onPet(settings)
-            auth.addHappiness(3)
-            pet.playReaction(PetPose.SHY)
-            pet.showBubble(PetDialogue.pet(settings))
-            sfx.tap()
-            refresh()
-        }
+        pet.onMenuPet = { doHomePet() }
         pet.onMenuFeed = { openFeedPanel() }
         pet.onMenuCardio = { startCardio() }
         pet.onMenuSleep = {
@@ -320,6 +339,7 @@ class MainActivity : AppCompatActivity() {
             onFed = { item ->
                 dialog.dismiss()
                 PetStats.onFed(settings, item.moodBoost)
+                CompanionDay.noteFeed(settings, auth)
                 binding.preview.setNapping(false)
                 binding.preview.playReaction(PetPose.HAPPY)
                 binding.preview.showBubble(PetDialogue.feed(settings, item.name))
@@ -338,6 +358,7 @@ class MainActivity : AppCompatActivity() {
         binding.preview.playCardio(4500L) {
             val kcal = FoodCatalog.cardioKcal()
             PetStats.onCardio(settings)
+            CompanionDay.noteCardio(settings, auth)
             binding.preview.showBubble(PetDialogue.cardio(settings, kcal), 4200L)
             sfx.tap()
             refresh()
@@ -356,14 +377,89 @@ class MainActivity : AppCompatActivity() {
         binding.profileChip.text = user.nickname
     }
 
-    private fun bindMoodLine() {
-        val res = when (PetStats.tier(settings.mood)) {
-            MoodTier.HAPPY -> R.string.home_mood_happy
-            MoodTier.OK -> R.string.home_mood_ok
-            MoodTier.LOW -> R.string.home_mood_low
-            MoodTier.SAD -> R.string.home_mood_sad
+    private fun doHomePet() {
+        PetStats.onPet(settings)
+        auth.addHappiness(3)
+        CompanionDay.notePet(settings, auth)
+        binding.preview.playReaction(PetPose.SHY)
+        binding.preview.showBubble(PetDialogue.pet(settings))
+        sfx.tap()
+        refresh()
+    }
+
+    private fun refreshTodayLine() {
+        val now = binding.todayLine.text?.toString().orEmpty()
+        binding.todayLine.text = PetDialogue.nextTodayLine(settings, now)
+        sfx.tap()
+    }
+
+    private fun easeHomeIn() {
+        binding.preview.animate().cancel()
+        binding.preview.alpha = 0.28f
+        binding.preview.animate().alpha(1f).setDuration(280).start()
+    }
+
+    private fun bindDailyCard() {
+        CompanionDay.rolloverGoals(settings)
+        val stage = CompanionBond.stage(settings)
+        val title = when (stage) {
+            BondStage.FIRST -> R.string.bond_first
+            BondStage.WARM -> R.string.bond_warm
+            BondStage.TACIT -> R.string.bond_tacit
+            BondStage.BOND -> R.string.bond_bond
         }
-        binding.moodLine.text = getString(res, settings.displayName())
+        binding.bondTitle.text = getString(R.string.bond_line, getString(title))
+        binding.bondBar.progress = CompanionBond.progress(settings)
+        binding.bondHint.text = when (stage) {
+            BondStage.BOND -> getString(R.string.bond_max)
+            BondStage.FIRST -> getString(R.string.bond_next, getString(R.string.bond_warm))
+            BondStage.WARM -> getString(R.string.bond_next, getString(R.string.bond_tacit))
+            BondStage.TACIT -> getString(R.string.bond_next, getString(R.string.bond_bond))
+        }
+        val streak = settings.streakDays
+        binding.streakLine.text = if (streak <= 1) {
+            getString(R.string.streak_first)
+        } else {
+            getString(R.string.streak_short, streak)
+        }
+        if (binding.todayLine.text.isNullOrBlank()) {
+            binding.todayLine.text = PetDialogue.todayLine(settings)
+        }
+        bindGoalChip(binding.chipGoalPet, settings.goalPet, R.string.goal_pet_on, R.string.goal_pet_off)
+        bindGoalChip(binding.chipGoalFeed, settings.goalFeed, R.string.goal_feed_on, R.string.goal_feed_off)
+        bindGoalChip(binding.chipGoalCardio, settings.goalCardio, R.string.goal_cardio_on, R.string.goal_cardio_off)
+        binding.happyHeart.text = getString(R.string.happy_heart, auth.happiness())
+        binding.happyHint.text = when {
+            settings.lastHappyRegenAmount > 0 && settings.lastHappyRegenDay == CompanionDay.todayKey() ->
+                getString(R.string.happy_hint_gain, settings.lastHappyRegenAmount)
+            auth.happiness() >= CompanionDay.HAPPINESS_SOFT_CAP -> getString(R.string.happy_hint_full)
+            else -> getString(R.string.happy_hint_wait)
+        }
+        binding.panel.happyHint.text = binding.happyHint.text
+        maybeCelebrateStage(stage)
+    }
+
+    private fun bindGoalChip(view: android.widget.TextView, on: Boolean, onRes: Int, offRes: Int) {
+        view.text = getString(if (on) onRes else offRes)
+        view.setBackgroundResource(if (on) R.drawable.bg_goal_on else R.drawable.bg_goal_off)
+    }
+
+    private fun maybeCelebrateStage(stage: BondStage) {
+        val seen = settings.lastBondStage
+        if (seen >= 0 && stage.ordinal > seen) {
+            binding.preview.animate().cancel()
+            binding.preview.animate()
+                .scaleX(1.06f)
+                .scaleY(1.06f)
+                .setDuration(180)
+                .withEndAction {
+                    binding.preview.animate().scaleX(1f).scaleY(1f).setDuration(220).start()
+                }
+                .start()
+            binding.preview.showBubble(getString(R.string.bond_up), 1400L)
+            sfx.tap()
+        }
+        settings.lastBondStage = stage.ordinal
     }
 
     private fun syncGenderGroup() {

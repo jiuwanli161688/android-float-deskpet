@@ -98,6 +98,62 @@ class PetSettings private constructor(context: Context) {
         get() = prefs.getLong(KEY_FEED_REGEN, 0L)
         set(value) = prefs.edit().putLong(KEY_FEED_REGEN, value).apply()
 
+    var lastVisitDay: Int
+        get() = prefs.getInt(KEY_VISIT_DAY, 0)
+        set(value) = prefs.edit().putInt(KEY_VISIT_DAY, value).apply()
+
+    var streakDays: Int
+        get() = prefs.getInt(KEY_STREAK, 0)
+        set(value) = prefs.edit().putInt(KEY_STREAK, value.coerceAtLeast(0)).apply()
+
+    var lastStreakCelebrate: Int
+        get() = prefs.getInt(KEY_STREAK_CELE, 0)
+        set(value) = prefs.edit().putInt(KEY_STREAK_CELE, value).apply()
+
+    var goalDay: Int
+        get() = prefs.getInt(KEY_GOAL_DAY, 0)
+        set(value) = prefs.edit().putInt(KEY_GOAL_DAY, value).apply()
+
+    var goalPet: Boolean
+        get() = prefs.getBoolean(KEY_GOAL_PET, false)
+        set(value) = prefs.edit().putBoolean(KEY_GOAL_PET, value).apply()
+
+    var goalFeed: Boolean
+        get() = prefs.getBoolean(KEY_GOAL_FEED, false)
+        set(value) = prefs.edit().putBoolean(KEY_GOAL_FEED, value).apply()
+
+    var goalCardio: Boolean
+        get() = prefs.getBoolean(KEY_GOAL_CARDIO, false)
+        set(value) = prefs.edit().putBoolean(KEY_GOAL_CARDIO, value).apply()
+
+    var goalBonus: Boolean
+        get() = prefs.getBoolean(KEY_GOAL_BONUS, false)
+        set(value) = prefs.edit().putBoolean(KEY_GOAL_BONUS, value).apply()
+
+    var lastHappyRegenDay: Int
+        get() = prefs.getInt(KEY_HAPPY_DAY, 0)
+        set(value) = prefs.edit().putInt(KEY_HAPPY_DAY, value).apply()
+
+    var lastHappyRegenAmount: Int
+        get() = prefs.getInt(KEY_HAPPY_GAIN, 0)
+        set(value) = prefs.edit().putInt(KEY_HAPPY_GAIN, value).apply()
+
+    var missYou: Boolean
+        get() = prefs.getBoolean(KEY_MISS_YOU, false)
+        set(value) = prefs.edit().putBoolean(KEY_MISS_YOU, value).apply()
+
+    var missYouDay: Int
+        get() = prefs.getInt(KEY_MISS_DAY, 0)
+        set(value) = prefs.edit().putInt(KEY_MISS_DAY, value).apply()
+
+    var missYouCount: Int
+        get() = prefs.getInt(KEY_MISS_COUNT, 0)
+        set(value) = prefs.edit().putInt(KEY_MISS_COUNT, value).apply()
+
+    var lastBondStage: Int
+        get() = prefs.getInt(KEY_BOND_SEEN, -1)
+        set(value) = prefs.edit().putInt(KEY_BOND_SEEN, value).apply()
+
     val isMale: Boolean get() = gender == GENDER_MALE
 
     fun resolvedStyle(): CharacterStyle = CharacterStyle.fromId(style, isMale)
@@ -177,6 +233,20 @@ class PetSettings private constructor(context: Context) {
         const val KEY_DECAY = "last_decay"
         const val KEY_INTERACT = "last_interact"
         const val KEY_FEED_REGEN = "last_feed_regen"
+        const val KEY_VISIT_DAY = "last_visit_day"
+        const val KEY_STREAK = "streak_days"
+        const val KEY_STREAK_CELE = "streak_celebrate"
+        const val KEY_GOAL_DAY = "goal_day"
+        const val KEY_GOAL_PET = "goal_pet"
+        const val KEY_GOAL_FEED = "goal_feed"
+        const val KEY_GOAL_CARDIO = "goal_cardio"
+        const val KEY_GOAL_BONUS = "goal_bonus"
+        const val KEY_HAPPY_DAY = "happy_regen_day"
+        const val KEY_HAPPY_GAIN = "happy_regen_gain"
+        const val KEY_MISS_YOU = "miss_you"
+        const val KEY_MISS_DAY = "miss_you_day"
+        const val KEY_MISS_COUNT = "miss_you_count"
+        const val KEY_BOND_SEEN = "bond_stage_seen"
         const val OUTFIT_CASUAL = "casual"
         const val OUTFIT_PAJAMA = "pajama"
         const val OUTFIT_HOODIE = "hoodie"
