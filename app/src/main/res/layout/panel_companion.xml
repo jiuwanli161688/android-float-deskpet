@@ -73,6 +73,21 @@
                     android:layout_height="48dp"
                     android:layout_marginTop="10dp"
                     android:text="@string/start_pet" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchAlways"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/always_show_title"
+                    android:textColor="@color/text_main" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/always_show_desc"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -458,79 +473,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/section_behavior"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchAlways"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/always_show_title"
-                    android:textColor="@color/text_main" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/always_show_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchGhost"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/pass_through_title"
-                    android:textColor="@color/text_main" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/pass_through_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/section_oem"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:lineSpacingExtra="4dp"
-                    android:text="@string/oem_body"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -538,6 +480,14 @@
                 android:text="@string/section_account"
                 android:textColor="@color/text_muted"
                 android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAlbum"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/album_open" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnProfile"

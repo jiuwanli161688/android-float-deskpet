@@ -74,6 +74,18 @@
                     android:textSize="22sp"
                     android:textStyle="bold"
                     tools:text="午安，歇一会儿" />
+
+                <TextView
+                    android:id="@+id/scheduleLine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_goal_off"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
+                    android:textColor="@color/text_main"
+                    android:textSize="14sp"
+                    tools:text="今天 TA 想…晒一会儿太阳" />
             </LinearLayout>
 
             <LinearLayout
@@ -87,11 +99,25 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="12dp">
 
-                <com.floatdeskpet.app.overlay.PetSpriteView
-                    android:id="@+id/preview"
+                <FrameLayout
                     android:layout_width="260dp"
-                    android:layout_height="340dp"
-                    android:contentDescription="@string/character_name" />
+                    android:layout_height="340dp">
+
+                    <View
+                        android:id="@+id/stageGlow"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:alpha="0"
+                        android:background="@drawable/bg_stage_glow"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                    <com.floatdeskpet.app.overlay.PetSpriteView
+                        android:id="@+id/preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/character_name" />
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/heroTitle"

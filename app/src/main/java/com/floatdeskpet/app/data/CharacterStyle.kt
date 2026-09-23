@@ -121,10 +121,14 @@ enum class CharacterStyle(
 
         fun tint(view: ImageView, settings: PetSettings) {
             val style = fromId(settings.style, settings.isMale)
-            if (style.hasDedicatedArt) {
-                view.clearColorFilter()
-            } else {
+            if (!style.hasDedicatedArt) {
                 view.colorFilter = style.colorFilter()
+                return
+            }
+            when (CompanionBond.stage(settings)) {
+                BondStage.TACIT -> view.setColorFilter(0x22C45C26)
+                BondStage.BOND -> view.setColorFilter(0x33C45C26)
+                else -> view.clearColorFilter()
             }
         }
     }

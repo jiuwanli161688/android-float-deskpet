@@ -68,6 +68,12 @@
             android:exported="false"
             android:parentActivityName=".ui.ProfileActivity" />
 
+        <activity
+            android:name=".ui.AlbumActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.FloatDeskPet" />
+
         <service
             android:name=".overlay.OverlayService"
             android:exported="false"

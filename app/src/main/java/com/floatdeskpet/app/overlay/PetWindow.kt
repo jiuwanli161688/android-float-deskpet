@@ -13,6 +13,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.PathInterpolator
 import com.floatdeskpet.app.auth.AuthStore
+import com.floatdeskpet.app.data.AlbumStore
 import com.floatdeskpet.app.data.CompanionDay
 import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.data.FoodItem
@@ -180,6 +181,7 @@ class PetWindow(private val context: Context) : PetActions {
             throw t
         }
         CompanionDay.tick(context)
+        AlbumStore.get(context).sync(settings)
         handler.postDelayed({ if (attached) sfx.appear() }, 120L)
         handler.postDelayed({
             if (attached) say(PetDialogue.greeting(settings), 3800L)

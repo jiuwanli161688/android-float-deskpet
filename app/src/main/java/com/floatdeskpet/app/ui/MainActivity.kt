@@ -19,9 +19,11 @@ import com.floatdeskpet.app.R
 import com.floatdeskpet.app.auth.AuthStore
 import com.floatdeskpet.app.data.BondStage
 import com.floatdeskpet.app.data.CharacterStyle
+import com.floatdeskpet.app.data.AlbumStore
 import com.floatdeskpet.app.data.CompanionBond
 import com.floatdeskpet.app.data.CompanionDay
 import com.floatdeskpet.app.data.CompanionMissYou
+import com.floatdeskpet.app.data.CompanionSchedule
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivityMainBinding
 import android.app.Dialog
@@ -107,11 +109,19 @@ class MainActivity : AppCompatActivity() {
         binding.chipGoalPet.setOnClickListener { doHomePet() }
         binding.chipGoalFeed.setOnClickListener { openFeedPanel() }
         binding.chipGoalCardio.setOnClickListener { startCardio() }
+        binding.panel.btnAlbum.setOnClickListener {
+            closePanel()
+            startActivity(Intent(this, AlbumActivity::class.java))
+        }
+        binding.scheduleLine.setOnClickListener {
+            val now = binding.scheduleLine.text?.toString().orEmpty()
+            val wish = CompanionSchedule.next(settings, now.removePrefix(getString(R.string.schedule_label, "").trim()))
+            binding.scheduleLine.text = getString(R.string.schedule_label, wish)
+        }
 
         binding.panel.sliderSize.value = settings.sizeDp.toFloat()
         binding.panel.sliderOpacity.value = settings.opacity.toFloat()
         binding.panel.switchAlways.isChecked = settings.alwaysShow
-        binding.panel.switchGhost.isChecked = settings.passThrough
         binding.panel.switchMute.isChecked = settings.muted
         binding.panel.switchTts.isChecked = settings.ttsEnabled
         binding.panel.switchMissYou.isChecked = settings.missYou
@@ -128,9 +138,6 @@ class MainActivity : AppCompatActivity() {
         }
         binding.panel.switchAlways.setOnCheckedChangeListener { _, checked ->
             settings.alwaysShow = checked
-        }
-        binding.panel.switchGhost.setOnCheckedChangeListener { _, checked ->
-            settings.passThrough = checked
         }
         binding.panel.switchMute.setOnCheckedChangeListener { _, checked ->
             settings.muted = checked
@@ -247,7 +254,6 @@ class MainActivity : AppCompatActivity() {
         binding.notifHint.visibility = binding.btnNotif.visibility
         binding.panel.notifHint.visibility = binding.panel.btnNotif.visibility
         binding.panel.switchAlways.isChecked = settings.alwaysShow
-        binding.panel.switchGhost.isChecked = settings.passThrough
         binding.panel.switchMute.isChecked = settings.muted
         binding.panel.switchTts.isChecked = settings.ttsEnabled
         binding.panel.switchMissYou.isChecked = settings.missYou
@@ -308,6 +314,8 @@ class MainActivity : AppCompatActivity() {
         pet.dragEnabled = false
         pet.embedBubble()
         pet.onTap = {
+            binding.stageGlow.animate().cancel()
+            binding.stageGlow.alpha = 0f
             PetStats.onTap(settings)
             sfx.tap()
             pet.showBubble(PetDialogue.tap(settings))
@@ -425,6 +433,7 @@ class MainActivity : AppCompatActivity() {
         if (binding.todayLine.text.isNullOrBlank()) {
             binding.todayLine.text = PetDialogue.todayLine(settings)
         }
+        binding.scheduleLine.text = getString(R.string.schedule_label, CompanionSchedule.line(settings))
         bindGoalChip(binding.chipGoalPet, settings.goalPet, R.string.goal_pet_on, R.string.goal_pet_off)
         bindGoalChip(binding.chipGoalFeed, settings.goalFeed, R.string.goal_feed_on, R.string.goal_feed_off)
         bindGoalChip(binding.chipGoalCardio, settings.goalCardio, R.string.goal_cardio_on, R.string.goal_cardio_off)
@@ -436,17 +445,21 @@ class MainActivity : AppCompatActivity() {
             else -> getString(R.string.happy_hint_wait)
         }
         binding.panel.happyHint.text = binding.happyHint.text
-        maybeCelebrateStage(stage)
+        val fresh = AlbumStore.get(this).sync(settings)
+        maybeCelebrateStage(stage, fresh)
     }
 
     private fun bindGoalChip(view: android.widget.TextView, on: Boolean, onRes: Int, offRes: Int) {
         view.text = getString(if (on) onRes else offRes)
         view.setBackgroundResource(if (on) R.drawable.bg_goal_on else R.drawable.bg_goal_off)
+        view.elevation = if (on) 4f * resources.displayMetrics.density else 0f
     }
 
-    private fun maybeCelebrateStage(stage: BondStage) {
+    private fun maybeCelebrateStage(stage: BondStage, fresh: List<String>) {
         val seen = settings.lastBondStage
-        if (seen >= 0 && stage.ordinal > seen) {
+        val up = seen >= 0 && stage.ordinal > seen
+        if (up) {
+            playGlow()
             binding.preview.animate().cancel()
             binding.preview.animate()
                 .scaleX(1.06f)
@@ -458,8 +471,19 @@ class MainActivity : AppCompatActivity() {
                 .start()
             binding.preview.showBubble(getString(R.string.bond_up), 1400L)
             sfx.tap()
+        } else if (fresh.isNotEmpty()) {
+            binding.preview.showBubble(getString(R.string.unlock_new), 1400L)
         }
         settings.lastBondStage = stage.ordinal
+    }
+
+    private fun playGlow() {
+        val glow = binding.stageGlow
+        glow.animate().cancel()
+        glow.alpha = 0f
+        glow.animate().alpha(0.9f).setDuration(220).withEndAction {
+            glow.animate().alpha(0f).setDuration(1100).start()
+        }.start()
     }
 
     private fun syncGenderGroup() {

@@ -3,35 +3,27 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_overlay_menu"
-    android:elevation="12dp"
-    android:minWidth="208dp"
-    android:orientation="vertical"
-    android:padding="12dp">
-
-    <TextView
-        android:id="@+id/menuTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:paddingHorizontal="8dp"
-        android:text="@string/menu_sheet_title"
-        android:textColor="@color/text_muted"
-        android:textSize="13sp" />
+    android:elevation="14dp"
+    android:gravity="bottom"
+    android:orientation="horizontal"
+    android:paddingHorizontal="10dp"
+    android:paddingTop="18dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:id="@+id/itemPet"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_width="56dp"
+        android:layout_height="68dp"
         android:background="@drawable/bg_overlay_menu_item"
         android:clickable="true"
         android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationY="12dp">
 
         <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:contentDescription="@null"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_overlay_pet" />
@@ -40,28 +32,28 @@
             android:id="@+id/labelPet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginTop="4dp"
             android:text="@string/menu_pet"
             android:textColor="@color/text_main"
-            android:textSize="16sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/itemFeed"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="6dp"
+        android:layout_width="56dp"
+        android:layout_height="68dp"
+        android:layout_marginStart="6dp"
         android:background="@drawable/bg_overlay_menu_item"
         android:clickable="true"
         android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationY="2dp">
 
         <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:contentDescription="@null"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_overlay_feed" />
@@ -70,28 +62,28 @@
             android:id="@+id/labelFeed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginTop="4dp"
             android:text="@string/menu_feed"
             android:textColor="@color/text_main"
-            android:textSize="16sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/itemCardio"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="6dp"
+        android:layout_width="56dp"
+        android:layout_height="68dp"
+        android:layout_marginStart="6dp"
         android:background="@drawable/bg_overlay_menu_item"
         android:clickable="true"
         android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationY="-8dp">
 
         <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:contentDescription="@null"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_overlay_cardio" />
@@ -100,29 +92,29 @@
             android:id="@+id/labelCardio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/menu_cardio"
+            android:layout_marginTop="4dp"
+            android:text="@string/action_cardio"
             android:textColor="@color/text_main"
-            android:textSize="16sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/itemHome"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="6dp"
+        android:layout_width="56dp"
+        android:layout_height="68dp"
+        android:layout_marginStart="6dp"
         android:background="@drawable/bg_overlay_menu_home"
         android:clickable="true"
         android:contentDescription="@string/menu_home_desc"
         android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationY="2dp">
 
         <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:contentDescription="@null"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_overlay_home" />
@@ -131,28 +123,28 @@
             android:id="@+id/labelHome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginTop="4dp"
             android:text="@string/menu_home"
             android:textColor="@color/on_primary_container"
-            android:textSize="16sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/itemSleep"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="6dp"
+        android:layout_width="56dp"
+        android:layout_height="68dp"
+        android:layout_marginStart="6dp"
         android:background="@drawable/bg_overlay_menu_item"
         android:clickable="true"
         android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationY="12dp">
 
         <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:contentDescription="@null"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_overlay_sleep" />
@@ -161,10 +153,10 @@
             android:id="@+id/labelSleep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginTop="4dp"
             android:text="@string/menu_sleep"
             android:textColor="@color/text_main"
-            android:textSize="16sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>
