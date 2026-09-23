@@ -9,7 +9,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -58,6 +58,7 @@ class PetSpriteView @JvmOverloads constructor(
         setTextColor(context.getColor(R.color.secondary))
         textSize = 11f
         visibility = GONE
+        alpha = 0f
     }
     private val menu = LinearLayout(context).apply {
         orientation = LinearLayout.HORIZONTAL
@@ -69,7 +70,7 @@ class PetSpriteView @JvmOverloads constructor(
     private val slop = ViewConfiguration.get(context).scaledTouchSlop
     private val minFling = ViewConfiguration.get(context).scaledMinimumFlingVelocity.toFloat()
 
-    private var frames = PetFrames.of(settings.outfit)
+    private var frames = PetFrames.of(settings)
     private var index = 0
     private var reacting = false
     private var reactSeq: IntArray = intArrayOf()
@@ -81,19 +82,23 @@ class PetSpriteView @JvmOverloads constructor(
     private var suppressDrag = false
     private var peeking = false
     private var napping = false
+    private var walking = false
     private var paused = false
     private var cycleIdx = 0
     private var tracker: VelocityTracker? = null
-    private val idleMs = 170L
-    private val napMs = 420L
-    private val reactMs = 80L
+    private val idleMs = 200L
+    private val napMs = 500L
+    private val reactMs = 90L
     private val cyclePoses = arrayOf(PetPose.HAPPY, PetPose.SHY, PetPose.SLEEP, PetPose.SAD)
+    private val chipPet: TextView
+    private val chipFeed: TextView
+    private val chipSleep: TextView
 
-    private val breath = ObjectAnimator.ofFloat(image, "translationY", 0f, -8f).apply {
-        duration = 1800
+    private val breath = ObjectAnimator.ofFloat(image, "translationY", 0f, -5.2f).apply {
+        duration = 2300
         repeatMode = ObjectAnimator.REVERSE
         repeatCount = ObjectAnimator.INFINITE
-        interpolator = AccelerateDecelerateInterpolator()
+        interpolator = PathInterpolator(0.42f, 0f, 0.58f, 1f)
     }
 
     private val tick = object : Runnable {
@@ -120,7 +125,7 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     private val hideBubble = Runnable {
-        speechBubble.animate().alpha(0f).setDuration(180).withEndAction {
+        speechBubble.animate().alpha(0f).setDuration(220).withEndAction {
             speechBubble.visibility = GONE
             speechBubble.alpha = 1f
             onBubbleChanged?.invoke()
@@ -171,21 +176,33 @@ class PetSpriteView @JvmOverloads constructor(
                 marginEnd = dp(10)
             },
         )
-        menu.addView(chip(context.getString(R.string.menu_pet)) { hideMenu(); onMenuPet?.invoke() })
-        menu.addView(chip(context.getString(R.string.menu_feed)) { hideMenu(); onMenuFeed?.invoke() })
-        menu.addView(chip(context.getString(R.string.menu_sleep)) { hideMenu(); onMenuSleep?.invoke() })
+        chipPet = chip("") { hideMenu(); onMenuPet?.invoke() }
+        chipFeed = chip("") { hideMenu(); onMenuFeed?.invoke() }
+        chipSleep = chip("") { hideMenu(); onMenuSleep?.invoke() }
+        menu.addView(chipPet)
+        menu.addView(chipFeed)
+        menu.addView(chipSleep)
         addView(
             menu,
             LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER).apply {
                 topMargin = dp(28)
             },
         )
-        applyOutfit()
+        applyCharacter()
     }
 
-    fun applyOutfit() {
-        frames = PetFrames.of(settings.outfit)
-        image.setImageResource(idleFrame())
+    fun applyOutfit() = applyCharacter()
+
+    fun applyCharacter() {
+        frames = PetFrames.of(settings)
+        image.setImageResource(if (napping) frames.sleep else idleFrame())
+        refreshMenuLabels()
+    }
+
+    fun setWalking(value: Boolean) {
+        if (walking == value) return
+        walking = value
+        restartBreath()
     }
 
     fun setPeeking(value: Boolean) {
@@ -200,19 +217,38 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     fun setNapping(value: Boolean) {
+        val was = napping
         napping = value
-        zzz.visibility = if (value && !peeking) VISIBLE else GONE
-        breath.cancel()
-        if (value) {
-            breath.setFloatValues(0f, -4f)
-            breath.duration = 2800
-        } else {
-            breath.setFloatValues(0f, -8f)
-            breath.duration = 1800
-        }
-        if (!paused && !peeking && !breath.isStarted) breath.start()
+        if (value) walking = false
+        restartBreath()
         index = 0
-        image.setImageResource(if (value) frames.sleep else frames.idle)
+        if (value && !was) {
+            zzz.visibility = if (!peeking) VISIBLE else GONE
+            zzz.animate().cancel()
+            zzz.alpha = 0f
+            zzz.animate().alpha(1f).setDuration(280).start()
+            image.animate().cancel()
+            image.animate().alpha(0.58f).setDuration(180).withEndAction {
+                image.setImageResource(frames.sleep)
+                image.animate().alpha(1f).setDuration(260).start()
+            }.start()
+        } else if (!value && was) {
+            zzz.animate().cancel()
+            zzz.animate().alpha(0f).setDuration(160).withEndAction {
+                zzz.visibility = GONE
+                zzz.alpha = 1f
+            }.start()
+            image.animate().cancel()
+            image.animate().alpha(0.58f).setDuration(150).withEndAction {
+                image.setImageResource(idleFrame())
+                image.animate().alpha(1f).setDuration(220).start()
+            }.start()
+        } else {
+            zzz.animate().cancel()
+            zzz.alpha = 1f
+            zzz.visibility = if (value && !peeking) VISIBLE else GONE
+            image.setImageResource(if (value) frames.sleep else idleFrame())
+        }
     }
 
     fun pauseAnim() {
@@ -227,7 +263,7 @@ class PetSpriteView @JvmOverloads constructor(
         if (peeking) return
         handler.removeCallbacks(tick)
         handler.post(tick)
-        if (!breath.isStarted) breath.start()
+        restartBreath()
     }
 
     fun showBubble(text: String, durationMs: Long = 3200L) {
@@ -250,13 +286,18 @@ class PetSpriteView @JvmOverloads constructor(
 
     fun setFacingRight(right: Boolean) {
         val s = if (right) 1f else -1f
-        if (image.scaleX != s) image.scaleX = s
+        if (abs(image.scaleX - s) < 0.04f) return
+        image.animate().cancel()
+        image.animate()
+            .scaleX(s)
+            .setDuration(260L)
+            .setInterpolator(PathInterpolator(0.42f, 0f, 0.58f, 1f))
+            .start()
     }
 
     fun playReaction(pose: PetPose) {
         if (peeking) return
-        napping = false
-        zzz.visibility = GONE
+        if (napping) setNapping(false)
         reacting = true
         index = 0
         reactSeq = reactionSeq(pose)
@@ -264,11 +305,14 @@ class PetSpriteView @JvmOverloads constructor(
         scaleX = 1f
         scaleY = 1f
         animate()
-            .scaleX(1.12f)
-            .scaleY(1.12f)
-            .setDuration(90)
+            .scaleX(1.10f)
+            .scaleY(1.10f)
+            .setDuration(120)
+            .setInterpolator(PathInterpolator(0.3f, 0f, 0.4f, 1f))
             .withEndAction {
-                animate().scaleX(1f).scaleY(1f).setDuration(180).start()
+                animate().scaleX(1f).scaleY(1f).setDuration(220)
+                    .setInterpolator(PathInterpolator(0.4f, 0f, 0.2f, 1f))
+                    .start()
             }
             .start()
     }
@@ -277,11 +321,11 @@ class PetSpriteView @JvmOverloads constructor(
         if (peeking) return
         animate().cancel()
         animate()
-            .scaleX(1.08f)
-            .scaleY(0.94f)
-            .setDuration(80)
+            .scaleX(1.07f)
+            .scaleY(0.96f)
+            .setDuration(110)
             .withEndAction {
-                animate().scaleX(1f).scaleY(1f).setDuration(160).start()
+                animate().scaleX(1f).scaleY(1f).setDuration(200).start()
             }
             .start()
         reacting = true
@@ -299,7 +343,7 @@ class PetSpriteView @JvmOverloads constructor(
     fun hideMenu() {
         if (menu.visibility != VISIBLE) return
         menu.animate().cancel()
-        menu.animate().alpha(0f).scaleX(0.85f).scaleY(0.85f).setDuration(120).withEndAction {
+        menu.animate().alpha(0f).scaleX(0.85f).scaleY(0.85f).setDuration(140).withEndAction {
             menu.visibility = GONE
             menu.alpha = 1f
             menu.scaleX = 1f
@@ -314,7 +358,7 @@ class PetSpriteView @JvmOverloads constructor(
         paused = false
         handler.removeCallbacks(tick)
         handler.post(tick)
-        if (!breath.isStarted) breath.start()
+        restartBreath()
     }
 
     override fun onDetachedFromWindow() {
@@ -381,13 +425,40 @@ class PetSpriteView @JvmOverloads constructor(
         return super.onTouchEvent(event)
     }
 
+    private fun restartBreath() {
+        breath.cancel()
+        image.translationY = 0f
+        when {
+            napping -> {
+                breath.setFloatValues(0f, -3.2f)
+                breath.duration = 3100
+            }
+            walking -> {
+                breath.setFloatValues(0f, -4.2f)
+                breath.duration = 480
+            }
+            else -> {
+                breath.setFloatValues(0f, -5.2f)
+                breath.duration = 2300
+            }
+        }
+        if (!paused && !peeking) breath.start()
+    }
+
+    private fun refreshMenuLabels() {
+        chipPet.text = context.getString(if (settings.isMale) R.string.menu_pet_m else R.string.menu_pet)
+        chipFeed.text = context.getString(if (settings.isMale) R.string.menu_feed_m else R.string.menu_feed)
+        chipSleep.text = context.getString(if (settings.isMale) R.string.menu_sleep_m else R.string.menu_sleep)
+    }
+
     private fun showMenu() {
+        refreshMenuLabels()
         menu.animate().cancel()
         menu.alpha = 0f
         menu.scaleX = 0.85f
         menu.scaleY = 0.85f
         menu.visibility = VISIBLE
-        menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start()
+        menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(160).start()
     }
 
     private fun idleFrame(): Int {

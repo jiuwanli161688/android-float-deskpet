@@ -127,6 +127,9 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             PetSettings.KEY_X,
             PetSettings.KEY_Y,
             PetSettings.KEY_OUTFIT,
+            PetSettings.KEY_GENDER,
+            PetSettings.KEY_MUTE,
+            PetSettings.KEY_TTS,
             -> window?.applySettings()
             PetSettings.KEY_VISIBLE -> applyVisibility()
             PetSettings.KEY_RUNNING -> if (!settings.running) quit()
@@ -206,7 +209,7 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         val text = if (settings.visible) getString(R.string.notif_text) else getString(R.string.notif_hidden_text)
         return NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_pet)
-            .setContentTitle(getString(R.string.notif_title))
+            .setContentTitle(getString(R.string.notif_title, settings.displayName()))
             .setContentText(text)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

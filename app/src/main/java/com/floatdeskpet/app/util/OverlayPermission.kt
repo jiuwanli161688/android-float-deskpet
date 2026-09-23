@@ -18,7 +18,7 @@ object OverlayPermission {
     }
 
     fun toastNeed(context: Context) {
-        Toast.makeText(context, "还需要悬浮窗权限，杏杏才能浮在其他应用上面", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "还需要悬浮窗权限，桌宠才能浮在其他应用上面", Toast.LENGTH_SHORT).show()
     }
 }
 

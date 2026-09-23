@@ -9,6 +9,7 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import com.floatdeskpet.app.R
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivityMainBinding
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var settings: PetSettings
     private var pendingStart = false
+    private var bindingName = false
 
     private val overlayLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -39,9 +41,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        settings = PetSettings.get(this)
+        if (settings.needsSetup()) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        settings = PetSettings.get(this)
 
         binding.btnPermission.setOnClickListener {
             overlayLauncher.launch(OverlayPermission.settingsIntent(this))
@@ -51,12 +58,16 @@ class MainActivity : AppCompatActivity() {
         binding.privacyLink.setOnClickListener {
             startActivity(Intent(this, PrivacyActivity::class.java))
         }
+        binding.btnChangeCharacter.setOnClickListener {
+            startActivity(Intent(this, SetupActivity::class.java).putExtra(SetupActivity.EXTRA_EDIT, true))
+        }
 
         binding.sliderSize.value = settings.sizeDp.toFloat()
         binding.sliderOpacity.value = settings.opacity.toFloat()
         binding.switchAlways.isChecked = settings.alwaysShow
         binding.switchGhost.isChecked = settings.passThrough
         binding.switchMute.isChecked = settings.muted
+        binding.switchTts.isChecked = settings.ttsEnabled
         applyPreview()
 
         binding.sliderSize.addOnChangeListener { _, value, fromUser ->
@@ -78,6 +89,31 @@ class MainActivity : AppCompatActivity() {
         binding.switchMute.setOnCheckedChangeListener { _, checked ->
             settings.muted = checked
         }
+        binding.switchTts.setOnCheckedChangeListener { _, checked ->
+            settings.ttsEnabled = checked
+        }
+        binding.genderGroup.addOnButtonCheckedListener { _, id, checked ->
+            if (!checked) return@addOnButtonCheckedListener
+            val male = id == R.id.genderMale
+            if (settings.isMale == male) return@addOnButtonCheckedListener
+            val oldDefault = PetSettings.defaultName(!male)
+            settings.gender = if (male) PetSettings.GENDER_MALE else PetSettings.GENDER_FEMALE
+            if (settings.petName.isBlank() || settings.petName == oldDefault) {
+                settings.petName = ""
+                syncNameField()
+            }
+            if (male && settings.outfit == PetSettings.OUTFIT_PAJAMA) {
+                settings.outfit = PetSettings.OUTFIT_CASUAL
+            }
+            applyPreview()
+            refreshHero()
+            syncOutfitGroup()
+        }
+        binding.inputName.doAfterTextChanged {
+            if (bindingName) return@doAfterTextChanged
+            settings.petName = it?.toString().orEmpty()
+            refreshHero()
+        }
         syncOutfitGroup()
         binding.outfitGroup.addOnButtonCheckedListener { _, id, checked ->
             if (!checked) return@addOnButtonCheckedListener
@@ -92,6 +128,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (!::binding.isInitialized) return
         if (settings.alwaysShow && settings.running && OverlayPermission.granted(this)) {
             OverlayService.start(this)
         }
@@ -124,6 +161,7 @@ class MainActivity : AppCompatActivity() {
         binding.switchAlways.isChecked = settings.alwaysShow
         binding.switchGhost.isChecked = settings.passThrough
         binding.switchMute.isChecked = settings.muted
+        binding.switchTts.isChecked = settings.ttsEnabled
         binding.sliderSize.value = settings.sizeDp.toFloat()
         binding.sliderOpacity.value = settings.opacity.toFloat()
         binding.labelSize.text = getString(R.string.label_size, settings.sizeDp)
@@ -135,8 +173,11 @@ class MainActivity : AppCompatActivity() {
             settings.affection,
             settings.feedCount,
         )
+        syncGenderGroup()
+        syncNameField()
         syncOutfitGroup()
         applyPreview()
+        refreshHero()
 
         when {
             !granted -> {
@@ -144,8 +185,8 @@ class MainActivity : AppCompatActivity() {
                 binding.btnToggle.text = getString(R.string.start_pet)
             }
             settings.running -> {
-                binding.status.text = getString(R.string.status_running)
-                binding.btnToggle.text = getString(R.string.stop_pet)
+                binding.status.text = getString(R.string.status_running, settings.displayName())
+                binding.btnToggle.text = getString(if (settings.isMale) R.string.stop_pet_m else R.string.stop_pet)
             }
             else -> {
                 binding.status.text = getString(R.string.status_stopped)
@@ -154,8 +195,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun refreshHero() {
+        val name = settings.displayName()
+        binding.heroTitle.text = getString(R.string.hero_title, name)
+        binding.preview.contentDescription = name
+    }
+
     private fun applyPreview() {
-        binding.preview.setImageResource(PetFrames.of(settings.outfit).idle)
+        binding.preview.setImageResource(PetFrames.of(settings).idle)
         binding.preview.alpha = settings.opacity / 100f
         val h = (settings.sizeDp * resources.displayMetrics.density).toInt()
         val w = (h * 3) / 4
@@ -163,11 +210,29 @@ class MainActivity : AppCompatActivity() {
         lp.width = w
         lp.height = h
         binding.preview.layoutParams = lp
+        binding.outfitPajama.visibility = if (settings.isMale) View.GONE else View.VISIBLE
+    }
+
+    private fun syncGenderGroup() {
+        val id = if (settings.isMale) R.id.genderMale else R.id.genderFemale
+        if (binding.genderGroup.checkedButtonId != id) {
+            binding.genderGroup.check(id)
+        }
+    }
+
+    private fun syncNameField() {
+        binding.nameLayout.hint = PetSettings.defaultName(settings.isMale)
+        val current = binding.inputName.text?.toString().orEmpty()
+        if (current != settings.petName) {
+            bindingName = true
+            binding.inputName.setText(settings.petName)
+            bindingName = false
+        }
     }
 
     private fun syncOutfitGroup() {
         val id = when (settings.outfit) {
-            PetSettings.OUTFIT_PAJAMA -> R.id.outfitPajama
+            PetSettings.OUTFIT_PAJAMA -> if (settings.isMale) R.id.outfitCasual else R.id.outfitPajama
             PetSettings.OUTFIT_HOODIE -> R.id.outfitHoodie
             else -> R.id.outfitCasual
         }
