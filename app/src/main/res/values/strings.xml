@@ -120,6 +120,9 @@
     <string name="menu_feed_m">投喂</string>
     <string name="menu_cardio">有氧</string>
     <string name="menu_sleep_m">歇会儿</string>
+    <string name="menu_sheet_title">想做点什么</string>
+    <string name="menu_home">回主页</string>
+    <string name="menu_home_desc">回到今日陪伴</string>
     <string name="section_oem">桌宠容易消失时</string>
     <string name="oem_body">部分手机锁屏或切到后台后，会把桌宠清掉。\n\n小米 / 红米：设置 → 应用设置 → 应用管理 → 悬浮桌宠 → 省电策略选「无限制」；同时允许自启动、后台弹出界面。\n\n华为 / 荣耀：设置 → 应用 → 应用启动管理 → 手动管理，打开自启动、关联启动、后台活动。\n\nOPPO / 一加 / vivo：关闭电池优化，允许悬浮窗与后台运行。\n\n通用路径：设置 → 应用 → 悬浮桌宠 → 电池 → 不优化。</string>
     <string name="toast_need_overlay">还需要悬浮窗权限，桌宠才能浮在其他应用上面</string>

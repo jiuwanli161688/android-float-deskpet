@@ -2,6 +2,7 @@ package com.floatdeskpet.app.overlay
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
@@ -16,6 +17,7 @@ import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.data.FoodItem
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.ui.FeedPanel
+import com.floatdeskpet.app.ui.MainActivity
 import com.floatdeskpet.app.util.dpSize
 import kotlin.math.abs
 import kotlin.math.hypot
@@ -45,6 +47,8 @@ class PetWindow(private val context: Context) : PetActions {
     private var bubbleAttached = false
     private var feedAttached = false
     private var feedPanel: FeedPanel? = null
+    private var menuAttached = false
+    private var actionMenu: OverlayActionMenu? = null
     private val autonomy = PetAutonomy()
     var onPeekState: ((Boolean) -> Unit)? = null
     private val feedParams = WindowManager.LayoutParams().apply {
@@ -56,6 +60,22 @@ class PetWindow(private val context: Context) : PetActions {
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         width = WindowManager.LayoutParams.MATCH_PARENT
         height = WindowManager.LayoutParams.MATCH_PARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+    }
+
+    private val menuParams = WindowManager.LayoutParams().apply {
+        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        format = PixelFormat.TRANSLUCENT
+        gravity = Gravity.TOP or Gravity.START
+        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+        width = WindowManager.LayoutParams.WRAP_CONTENT
+        height = WindowManager.LayoutParams.WRAP_CONTENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -93,7 +113,9 @@ class PetWindow(private val context: Context) : PetActions {
 
     init {
         view.onBubbleChanged = { syncBubble() }
+        view.inlineMenu = false
         view.onDrag = { dx, dy ->
+            hideActionMenu()
             stopMotion()
             moveBy(dx, dy)
         }
@@ -103,7 +125,7 @@ class PetWindow(private val context: Context) : PetActions {
         }
         view.onFling = { vx, vy -> startFling(vx, vy) }
         view.onTap = {
-            if (!peeking) {
+            if (!hideActionMenu() && !peeking) {
                 PetStats.onTap(settings)
                 sfx.tap()
                 say(PetDialogue.tap(settings))
@@ -119,6 +141,7 @@ class PetWindow(private val context: Context) : PetActions {
         view.onLongPressAction = {
             sfx.menu()
             stopMotion()
+            showActionMenu()
             scheduleIdle()
         }
         view.onPeekWake = {
@@ -168,6 +191,7 @@ class PetWindow(private val context: Context) : PetActions {
         moveAnim?.cancel()
         view.hideMenu()
         view.hideBubbleNow()
+        hideActionMenu()
         hideFeedPanel()
         detachBubble()
         if (!attached) {
@@ -213,6 +237,7 @@ class PetWindow(private val context: Context) : PetActions {
             pauseHeavy()
             view.hideMenu()
             view.hideBubbleNow()
+            hideActionMenu()
             hideFeedPanel()
         } else if (attached) {
             resumeHeavy()
@@ -223,6 +248,7 @@ class PetWindow(private val context: Context) : PetActions {
 
     fun pauseHeavy() {
         heavyPaused = true
+        hideActionMenu()
         stopMotion()
         handler.removeCallbacks(idleWalk)
         handler.removeCallbacks(idleNap)
@@ -244,6 +270,7 @@ class PetWindow(private val context: Context) : PetActions {
     }
 
     override fun pet() {
+        hideActionMenu()
         if (peeking) wakeFromPeek()
         PetStats.onPet(settings)
         AuthStore.get(context).addHappiness(3)
@@ -255,12 +282,14 @@ class PetWindow(private val context: Context) : PetActions {
     }
 
     override fun openFeed() {
+        hideActionMenu()
         if (peeking) wakeFromPeek()
         view.hideMenu()
         showFeedPanel()
     }
 
     override fun cardio() {
+        hideActionMenu()
         if (peeking) wakeFromPeek()
         hideFeedPanel()
         view.setNapping(false)
@@ -284,6 +313,7 @@ class PetWindow(private val context: Context) : PetActions {
     }
 
     override fun sleep() {
+        hideActionMenu()
         if (peeking) wakeFromPeek()
         PetStats.onSleep(settings)
         enterNap()
@@ -383,6 +413,7 @@ class PetWindow(private val context: Context) : PetActions {
         if (!canAutonomous() || peeking) return
         stopMotion()
         view.hideMenu()
+        hideActionMenu()
         restoreX = params.x
         restoreY = params.y
         val b = bounds()
@@ -528,7 +559,7 @@ class PetWindow(private val context: Context) : PetActions {
     }
 
     private fun canAutonomous(): Boolean {
-        return attached && settings.visible && !heavyPaused && !peeking && !view.isMenuOpen() && !settings.passThrough
+        return attached && settings.visible && !heavyPaused && !peeking && !view.isMenuOpen() && !menuAttached && !settings.passThrough
     }
 
     private fun moveBy(dx: Int, dy: Int) {
@@ -633,6 +664,101 @@ class PetWindow(private val context: Context) : PetActions {
         feedAttached = false
         feedPanel = null
         setPetTouchable(true)
+    }
+
+    private fun openHome() {
+        hideActionMenu()
+        val intent = Intent(context, MainActivity::class.java)
+            .addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP,
+            )
+        context.startActivity(intent)
+    }
+
+    private fun showActionMenu() {
+        if (menuAttached) {
+            actionMenu?.refresh()
+            placeActionMenu()
+            return
+        }
+        val menu = OverlayActionMenu(
+            context,
+            onPet = { pet() },
+            onFeed = { openFeed() },
+            onCardio = { cardio() },
+            onSleep = { sleep() },
+            onHome = { openHome() },
+            onDismiss = { hideActionMenu() },
+        )
+        try {
+            actionMenu = menu
+            layoutActionMenu(menu)
+            wm.addView(menu.root, menuParams)
+            menuAttached = true
+        } catch (_: Throwable) {
+            menuAttached = false
+            actionMenu = null
+        }
+    }
+
+    private fun hideActionMenu(): Boolean {
+        val menu = actionMenu ?: return false
+        if (menuAttached) {
+            try {
+                wm.removeViewImmediate(menu.root)
+            } catch (_: Throwable) {
+                try {
+                    wm.removeView(menu.root)
+                } catch (_: Throwable) {
+                }
+            }
+        }
+        menuAttached = false
+        actionMenu = null
+        return true
+    }
+
+    private fun layoutActionMenu(menu: OverlayActionMenu) {
+        val dm = context.resources.displayMetrics
+        val maxW = (dm.widthPixels - context.dpSize(24)).coerceAtLeast(1)
+        val maxH = (dm.heightPixels - context.dpSize(48)).coerceAtLeast(1)
+        menu.root.measure(
+            View.MeasureSpec.makeMeasureSpec(maxW, View.MeasureSpec.AT_MOST),
+            View.MeasureSpec.makeMeasureSpec(maxH, View.MeasureSpec.AT_MOST),
+        )
+        val mw = menu.root.measuredWidth.coerceAtLeast(1)
+        val mh = menu.root.measuredHeight.coerceAtLeast(1)
+        val placed = SpeechBubbleLayout.place(
+            params.x,
+            params.y,
+            params.width,
+            params.height,
+            mw,
+            mh,
+            dm.widthPixels,
+            dm.heightPixels,
+            context.dpSize(8),
+            context.dpSize(28),
+            context.dpSize(16),
+            context.dpSize(10),
+        )
+        menuParams.width = mw
+        menuParams.height = mh
+        menuParams.x = placed.first
+        menuParams.y = placed.second
+    }
+
+    private fun placeActionMenu() {
+        val menu = actionMenu ?: return
+        if (!attached) return
+        layoutActionMenu(menu)
+        if (!menuAttached) return
+        try {
+            wm.updateViewLayout(menu.root, menuParams)
+        } catch (_: Throwable) {
+        }
     }
 
     private fun setPetTouchable(on: Boolean) {

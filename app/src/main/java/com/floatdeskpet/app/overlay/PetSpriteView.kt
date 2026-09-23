@@ -36,6 +36,7 @@ class PetSpriteView @JvmOverloads constructor(
     var onMenuFeed: (() -> Unit)? = null
     var onMenuCardio: (() -> Unit)? = null
     var onMenuSleep: (() -> Unit)? = null
+    var inlineMenu: Boolean = true
     var dragEnabled: Boolean = true
     private var facingRight = true
 
@@ -65,14 +66,23 @@ class PetSpriteView @JvmOverloads constructor(
         alpha = 0f
     }
     private val menu = LinearLayout(context).apply {
-        orientation = LinearLayout.HORIZONTAL
+        orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER
         visibility = GONE
+        setBackgroundResource(R.drawable.bg_overlay_menu)
+        val pad = (10 * resources.displayMetrics.density).toInt()
+        setPadding(pad, pad, pad, pad)
+        elevation = 8f * resources.displayMetrics.density
     }
 
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val slop = ViewConfiguration.get(context).scaledTouchSlop
+    private val longPressSlop = slop * 2
+    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
     private val minFling = ViewConfiguration.get(context).scaledMinimumFlingVelocity.toFloat()
+    private var longPressArmed = false
+    private var longPressFired = false
+    private val fireLongPress = Runnable { emitLongPress() }
 
     private var frames = PetFrames.of(settings)
     private var index = 0
@@ -169,10 +179,7 @@ class PetSpriteView @JvmOverloads constructor(
             }
 
             override fun onLongPress(e: MotionEvent) {
-                if (dragging || peeking) return
-                suppressDrag = true
-                showMenu()
-                onLongPressAction?.invoke()
+                emitLongPress()
             }
         },
     )
@@ -485,6 +492,7 @@ class PetSpriteView @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         handler.removeCallbacks(tick)
         handler.removeCallbacks(hideBubble)
+        handler.removeCallbacks(fireLongPress)
         breath.cancel()
         image.translationY = 0f
         tracker?.recycle()
@@ -505,12 +513,21 @@ class PetSpriteView @JvmOverloads constructor(
                 downY = event.rawY
                 dragging = false
                 suppressDrag = false
+                longPressFired = false
+                longPressArmed = true
+                handler.removeCallbacks(fireLongPress)
+                handler.postDelayed(fireLongPress, longPressTimeout)
                 parent?.requestDisallowInterceptTouchEvent(dragEnabled)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
+                val dist = hypot(event.rawX - downX, event.rawY - downY)
+                if (longPressArmed && dist > longPressSlop) {
+                    handler.removeCallbacks(fireLongPress)
+                    longPressArmed = false
+                }
                 if (!dragEnabled) {
-                    if (abs(event.rawX - downX) > slop || abs(event.rawY - downY) > slop) {
+                    if (dist > slop) {
                         parent?.requestDisallowInterceptTouchEvent(false)
                     }
                     return true
@@ -518,7 +535,7 @@ class PetSpriteView @JvmOverloads constructor(
                 if (suppressDrag) return true
                 val dx = (event.rawX - lastX).toInt()
                 val dy = (event.rawY - lastY).toInt()
-                if (!dragging && (abs(event.rawX - downX) > slop || abs(event.rawY - downY) > slop)) {
+                if (!dragging && dist > longPressSlop) {
                     dragging = true
                     hideMenu()
                 }
@@ -530,6 +547,8 @@ class PetSpriteView @JvmOverloads constructor(
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                handler.removeCallbacks(fireLongPress)
+                longPressArmed = false
                 val wasDragging = dragging
                 dragging = false
                 suppressDrag = false
@@ -577,6 +596,17 @@ class PetSpriteView @JvmOverloads constructor(
         chipFeed.text = context.getString(if (settings.isMale) R.string.menu_feed_m else R.string.menu_feed)
         chipCardio.text = context.getString(R.string.menu_cardio)
         chipSleep.text = context.getString(if (settings.isMale) R.string.menu_sleep_m else R.string.menu_sleep)
+    }
+
+    private fun emitLongPress() {
+        if (longPressFired || dragging) return
+        if (peeking && inlineMenu) return
+        longPressFired = true
+        longPressArmed = false
+        handler.removeCallbacks(fireLongPress)
+        suppressDrag = true
+        if (inlineMenu) showMenu()
+        onLongPressAction?.invoke()
     }
 
     private fun showMenu() {
@@ -634,15 +664,17 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     private fun chip(label: String, click: () -> Unit): TextView {
-        val padH = dp(10)
-        val padV = dp(6)
+        val padH = dp(14)
+        val padV = dp(9)
         val gap = dp(4)
         return TextView(context).apply {
             text = label
+            minHeight = dp(40)
+            gravity = Gravity.CENTER
             setPadding(padH, padV, padH, padV)
-            setBackgroundResource(R.drawable.bg_menu_chip)
+            setBackgroundResource(R.drawable.bg_overlay_menu_item)
             setTextColor(context.getColor(R.color.text_main))
-            textSize = 12f
+            textSize = 13f
             setOnClickListener { click() }
             val lp = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             lp.marginStart = gap
