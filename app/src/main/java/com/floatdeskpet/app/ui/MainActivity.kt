@@ -245,13 +245,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyHomeArt() {
         val frames = PetFrames.of(settings)
-        val res = when (settings.resolvedStyle()) {
-            CharacterStyle.CHENWEN -> frames.tilt
-            CharacterStyle.DASHU -> frames.shy
-            else -> frames.idle
-        }
-        binding.preview.setImageResource(res)
+        binding.preview.setImageResource(frames.idle)
         CharacterStyle.tint(binding.preview, settings)
+        binding.panel.stylePreview.setImageResource(frames.idle)
+        CharacterStyle.tint(binding.panel.stylePreview, settings)
     }
 
     private fun bindUserChip() {
@@ -341,7 +338,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun bindOutfitDesc() {
         binding.panel.outfitDesc.text = getString(
-            if (settings.isMale) R.string.outfit_desc_m else R.string.outfit_desc_f,
+            when {
+                settings.resolvedStyle().hasDedicatedArt -> R.string.outfit_desc_style
+                settings.isMale -> R.string.outfit_desc_m
+                else -> R.string.outfit_desc_f
+            },
         )
     }
 

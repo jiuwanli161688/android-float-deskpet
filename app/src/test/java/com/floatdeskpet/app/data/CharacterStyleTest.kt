@@ -19,4 +19,14 @@ class CharacterStyleTest {
         assertEquals(CharacterStyle.DASHU, CharacterStyle.fromId("dashu", true))
         assertEquals(PetSettings.OUTFIT_HOODIE, CharacterStyle.DASHU.suggestedOutfit)
     }
+
+    @Test
+    fun dedicatedArtStyles() {
+        assertEquals(
+            setOf("yujie", "luoli", "qingchun"),
+            CharacterStyle.all(false).filter { it.hasDedicatedArt }.map { it.id }.toSet(),
+        )
+        assertTrue(CharacterStyle.DASHU.hasDedicatedArt)
+        assertTrue(!CharacterStyle.WENROU.hasDedicatedArt)
+    }
 }

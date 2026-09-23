@@ -51,6 +51,7 @@
     <string name="outfit_desc">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
     <string name="outfit_desc_f">衣服都存在手机里，可随时换。女生有日常、睡衣和出行。</string>
     <string name="outfit_desc_m">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
+    <string name="outfit_desc_style">这身造型跟着风格走：发型、体型和衣服轮廓都会换。想换味道，点上面的风格就好。</string>
 
     <string name="style_yujie">御姐</string>
     <string name="style_luoli">萝莉</string>

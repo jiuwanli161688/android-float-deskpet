@@ -38,6 +38,9 @@ enum class CharacterStyle(
         DASHU -> com.floatdeskpet.app.R.string.style_dashu_blurb
     }
 
+    val hasDedicatedArt: Boolean
+        get() = this == YUJIE || this == LUOLI || this == QINGCHUN || this == DASHU
+
     fun colorFilter(): ColorMatrixColorFilter {
         val extra = when (this) {
             YUJIE -> floatArrayOf(
@@ -108,7 +111,12 @@ enum class CharacterStyle(
         }
 
         fun tint(view: ImageView, settings: PetSettings) {
-            view.colorFilter = fromId(settings.style, settings.isMale).colorFilter()
+            val style = fromId(settings.style, settings.isMale)
+            if (style.hasDedicatedArt) {
+                view.clearColorFilter()
+            } else {
+                view.colorFilter = style.colorFilter()
+            }
         }
     }
 }

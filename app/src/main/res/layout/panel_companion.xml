@@ -208,6 +208,16 @@
                     android:textColor="@color/text_muted"
                     android:textSize="13sp" />
 
+                <ImageView
+                    android:id="@+id/stylePreview"
+                    android:layout_width="120dp"
+                    android:layout_height="160dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/label_style"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pet_f_qingchun_idle" />
+
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/styleGroup"
                     android:layout_width="match_parent"
