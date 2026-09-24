@@ -1,7 +1,6 @@
 package com.floatdeskpet.app.overlay
 
 import android.animation.ValueAnimator
-import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -57,8 +56,7 @@ class PetWindow(private val context: Context) : PetActions {
         type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.CENTER
-        flags = hwFlag() or
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+        flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         width = WindowManager.LayoutParams.MATCH_PARENT
         height = WindowManager.LayoutParams.MATCH_PARENT
@@ -74,7 +72,6 @@ class PetWindow(private val context: Context) : PetActions {
         gravity = Gravity.TOP or Gravity.START
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
-            hwFlag() or
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
@@ -103,7 +100,6 @@ class PetWindow(private val context: Context) : PetActions {
         gravity = Gravity.TOP or Gravity.START
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-            hwFlag() or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         width = 1
         height = 1
@@ -874,21 +870,10 @@ class PetWindow(private val context: Context) : PetActions {
 
     private fun baseFlags(): Int {
         var flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            hwFlag() or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         if (settings.passThrough) {
             flags = flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
         }
         return flags
-    }
-
-    companion object {
-        private fun hwFlag(): Int {
-            return if (ActivityManager.isHighEndGfx()) {
-                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-            } else {
-                0
-            }
-        }
     }
 }
