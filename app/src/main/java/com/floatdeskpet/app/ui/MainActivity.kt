@@ -3,14 +3,11 @@ package com.floatdeskpet.app.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -30,7 +27,6 @@ import com.floatdeskpet.app.data.CompanionMissYou
 import com.floatdeskpet.app.data.CompanionSchedule
 import com.floatdeskpet.app.data.PetSettings
 import com.floatdeskpet.app.databinding.ActivityMainBinding
-import android.app.Dialog
 import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.overlay.OverlayService
 import com.floatdeskpet.app.overlay.OverlayVisibility
@@ -119,12 +115,10 @@ class MainActivity : AppCompatActivity() {
             closePanel()
             startActivity(Intent(this, SetupActivity::class.java).putExtra(SetupActivity.EXTRA_EDIT, true))
         }
-        binding.panel.btnFeed.setOnClickListener { openFeedPanel() }
         binding.panel.btnCardio.setOnClickListener { startCardio() }
         binding.panel.btnRest.setOnClickListener { togglePet() }
         binding.todayCard.setOnClickListener { refreshTodayLine() }
         binding.chipGoalPet.setOnClickListener { doHomePet() }
-        binding.chipGoalFeed.setOnClickListener { openFeedPanel() }
         binding.chipGoalCardio.setOnClickListener { startCardio() }
         binding.panel.btnAlbum.setOnClickListener {
             closePanel()
@@ -318,6 +312,7 @@ class MainActivity : AppCompatActivity() {
     private fun bindHomePet() {
         val pet = binding.preview
         pet.dragEnabled = false
+        pet.inlineMenu = false
         pet.embedBubble()
         pet.onTap = {
             binding.stageGlow.animate().cancel()
@@ -333,9 +328,9 @@ class MainActivity : AppCompatActivity() {
             pet.showBubble(PetDialogue.pose(settings, pose))
             bindDailyCard()
         }
-        pet.onLongPressAction = { sfx.menu() }
+        pet.onLongPressAction = { }
         pet.onMenuPet = { doHomePet() }
-        pet.onMenuFeed = { openFeedPanel() }
+        pet.onMenuFeed = null
         pet.onMenuCardio = { startCardio() }
         pet.onMenuSleep = {
             PetStats.onSleep(settings)
@@ -343,35 +338,6 @@ class MainActivity : AppCompatActivity() {
             pet.showBubble(PetDialogue.sleep(settings))
             refresh()
         }
-    }
-
-    private fun openFeedPanel() {
-        closeHubSheet()
-        closePanel()
-        val dialog = Dialog(this, android.R.style.Theme_Translucent_NoTitleBar)
-        val panel = FeedPanel(
-            this,
-            onFed = { item ->
-                dialog.dismiss()
-                PetStats.onFed(settings, item.moodBoost)
-                CompanionDay.noteFeed(settings, auth)
-                binding.preview.setNapping(false)
-                binding.preview.playReaction(PetPose.HAPPY)
-                binding.preview.showBubble(PetDialogue.feed(settings, item.name))
-                sfx.tap()
-                refresh()
-            },
-            onClose = { dialog.dismiss() },
-        )
-        dialog.setContentView(panel.root)
-        dialog.setCancelable(true)
-        dialog.setCanceledOnTouchOutside(true)
-        dialog.window?.apply {
-            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        }
-        dialog.show()
     }
 
     private fun startCardio() {

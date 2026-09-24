@@ -161,13 +161,13 @@
                         android:textColor="@color/text_muted"
                         android:textSize="12sp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnFeed"
-                        style="@style/Widget.Material3.Button.TonalButton"
+                    <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/action_feed" />
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/feed_on_overlay"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCardio"

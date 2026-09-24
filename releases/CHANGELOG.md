@@ -1,5 +1,12 @@
 # 更新记录
 
+## 1.5.3
+
+- 今日陪伴不再投喂：首页大角色、长按菜单、抽屉都去掉投喂入口
+- 投喂只留在窗边小浮层：长按 → 喂食 → 选食物 → 喂给 TA
+- 浮层投喂改成独立面板（纯点按、全屏可触摸、打开时藏起角色，避免挡点击）
+- 归档 APK：`releases/float-deskpet-1.5.3-debug.apk`、`releases/float-deskpet-1.5.3-release.apk`
+
 ## 1.5.2
 
 - 请来身边不再把 OverlayService 卡死：先进前台，建窗、TTS、音效都挪到之后

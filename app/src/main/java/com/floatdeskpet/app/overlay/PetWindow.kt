@@ -17,7 +17,6 @@ import com.floatdeskpet.app.data.CompanionDay
 import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.data.FoodItem
 import com.floatdeskpet.app.data.PetSettings
-import com.floatdeskpet.app.ui.FeedPanel
 import com.floatdeskpet.app.ui.MainActivity
 import com.floatdeskpet.app.util.dpSize
 import kotlin.math.abs
@@ -47,7 +46,7 @@ class PetWindow(private val context: Context) : PetActions {
     private var moveAnim: ValueAnimator? = null
     private var bubbleAttached = false
     private var feedAttached = false
-    private var feedPanel: FeedPanel? = null
+    private var feedPanel: OverlayFeedPanel? = null
     private var menuAttached = false
     private var actionMenu: OverlayActionMenu? = null
     private val autonomy = PetAutonomy()
@@ -57,7 +56,7 @@ class PetWindow(private val context: Context) : PetActions {
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.CENTER
         flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         width = WindowManager.LayoutParams.MATCH_PARENT
         height = WindowManager.LayoutParams.MATCH_PARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -286,7 +285,7 @@ class PetWindow(private val context: Context) : PetActions {
         hideActionMenu()
         if (peeking) wakeFromPeek()
         view.hideMenu()
-        showFeedPanel()
+        handler.post { showFeedPanel() }
     }
 
     override fun cardio() {
@@ -619,7 +618,7 @@ class PetWindow(private val context: Context) : PetActions {
     }
 
     private fun update() {
-        if (!attached) return
+        if (!attached || feedAttached) return
         try {
             wm.updateViewLayout(view, params)
         } catch (_: Throwable) {
@@ -632,7 +631,10 @@ class PetWindow(private val context: Context) : PetActions {
             feedPanel?.refresh()
             return
         }
-        val panel = FeedPanel(
+        pauseHeavy()
+        view.visibility = View.GONE
+        view.hideBubbleNow()
+        val panel = OverlayFeedPanel(
             context,
             onFed = { item ->
                 hideFeedPanel()
@@ -643,12 +645,16 @@ class PetWindow(private val context: Context) : PetActions {
         try {
             setPetTouchable(false)
             wm.addView(panel.root, feedParams)
+            panel.root.isFocusableInTouchMode = true
+            panel.root.requestFocus()
             feedPanel = panel
             feedAttached = true
         } catch (_: Throwable) {
             feedAttached = false
             feedPanel = null
             setPetTouchable(true)
+            view.visibility = View.VISIBLE
+            resumeHeavy()
         }
     }
 
@@ -667,6 +673,10 @@ class PetWindow(private val context: Context) : PetActions {
         feedAttached = false
         feedPanel = null
         setPetTouchable(true)
+        if (attached && OverlayVisibility.shouldShow(settings.visible)) {
+            view.visibility = View.VISIBLE
+            resumeHeavy()
+        }
     }
 
     private fun openHome() {

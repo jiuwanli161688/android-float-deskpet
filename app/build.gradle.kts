@@ -11,8 +11,8 @@ android {
         applicationId = "com.floatdeskpet.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 16
-        versionName = "1.5.2"
+        versionCode = 17
+        versionName = "1.5.3"
         resourceConfigurations += listOf("zh", "zh-rCN", "en")
     }
 

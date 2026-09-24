@@ -107,7 +107,8 @@
 
     <string name="section_feel">心情</string>
     <string name="stats_line">心情 %1$d · 亲密度 %2$d · 幸福点 %3$d</string>
-    <string name="stats_desc">摸摸会变好，也会悄悄多一点幸福点。投喂会花掉幸福点。太久不理会，心情会慢慢下来。</string>
+    <string name="stats_desc">摸摸会变好，也会悄悄多一点幸福点。投喂请去窗边长按 TA。太久不理会，心情会慢慢下来。</string>
+    <string name="feed_on_overlay">投喂只在请来身边之后：长按窗边的 TA，选一样再喂给 TA。</string>
     <string name="action_feed">投喂</string>
     <string name="action_cardio">动一动</string>
     <string name="feed_title">带点好吃的来</string>
