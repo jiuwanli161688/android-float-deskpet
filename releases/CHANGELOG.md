@@ -1,5 +1,13 @@
 # 更新记录
 
+## 1.5.2
+
+- 请来身边不再把 OverlayService 卡死：先进前台，建窗、TTS、音效都挪到之后
+- 首页在前时仍不画浮层；回到桌面再挂窗
+- 无加速模拟器去掉浮层硬件加速，避免 WindowManager 卡住
+- 悬浮窗投喂仍走点按确认，喂给 TA 会扣幸福点
+- 归档 APK：`releases/float-deskpet-1.5.2-debug.apk`、`releases/float-deskpet-1.5.2-release.apk`
+
 ## 1.5.1
 
 - 修好「喂给 TA」：首页大角色和悬浮窗投喂面板点确认都会扣幸福点、更新心情、出气泡和音效

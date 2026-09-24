@@ -13,7 +13,9 @@ import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
 import android.os.BatteryManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.floatdeskpet.app.R
@@ -29,6 +31,9 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private var shake: ShakeWake? = null
     private var lastCharging: Boolean? = null
     private var toldLow = false
+    private var auxBound = false
+    private var pendingAction: String? = null
+    private val main = Handler(Looper.getMainLooper())
 
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -60,20 +65,30 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
+    private val bringUp = Runnable {
+        try {
+            ensureWindow()
+            when (pendingAction) {
+                ACTION_OPEN_FEED -> window?.openFeed()
+                ACTION_CARDIO -> window?.cardio()
+            }
+            pendingAction = null
+        } catch (_: Throwable) {
+            quit()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         settings = PetSettings.get(this)
         ensureChannel()
+        startAsForeground(lite = true)
         settings.prefs.registerOnSharedPreferenceChangeListener(this)
-        shake = ShakeWake(this) { window?.onShake() }
-        registerSys(screenReceiver, IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_OFF)
-            addAction(Intent.ACTION_SCREEN_ON)
-        })
-        registerSys(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        main.post { bindAux() }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startAsForeground(lite = true)
         when (intent?.action) {
             ACTION_EXIT -> {
                 quit()
@@ -81,47 +96,23 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
             ACTION_TOGGLE_VISIBLE -> settings.visible = !settings.visible
             ACTION_TOGGLE_GHOST -> settings.passThrough = !settings.passThrough
-            ACTION_OPEN_FEED -> {
-                if (settings.running && OverlayPermission.granted(this)) {
-                    startAsForeground()
-                    ensureWindow()
-                    window?.openFeed()
-                    return START_STICKY
-                }
-            }
-            ACTION_CARDIO -> {
-                if (settings.running && OverlayPermission.granted(this)) {
-                    startAsForeground()
-                    ensureWindow()
-                    window?.cardio()
-                    return START_STICKY
-                }
-            }
-            ACTION_SYNC_VIS -> {
-                if (settings.running && OverlayPermission.granted(this)) {
-                    startAsForeground()
-                    ensureWindow()
-                    applyVisibility()
-                    return START_STICKY
-                }
-            }
         }
         if (!OverlayPermission.granted(this) || !settings.running) {
             quit()
             return START_NOT_STICKY
         }
-        try {
-            startAsForeground()
-            ensureWindow()
-        } catch (_: Throwable) {
-            quit()
-            return START_NOT_STICKY
-        }
+        pendingAction = intent?.action
+        main.removeCallbacks(bringUp)
+        main.post(bringUp)
         return START_STICKY
     }
 
     override fun onDestroy() {
-        settings.prefs.unregisterOnSharedPreferenceChangeListener(this)
+        main.removeCallbacksAndMessages(null)
+        try {
+            settings.prefs.unregisterOnSharedPreferenceChangeListener(this)
+        } catch (_: Throwable) {
+        }
         shake?.stop()
         shake = null
         try {
@@ -163,15 +154,34 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 if (key == PetSettings.KEY_MUTE) CompanionMissYou.reschedule(this)
             }
             PetSettings.KEY_MISS_YOU -> CompanionMissYou.reschedule(this)
-            PetSettings.KEY_VISIBLE -> applyVisibility()
+            PetSettings.KEY_VISIBLE -> {
+                main.removeCallbacks(bringUp)
+                main.post(bringUp)
+            }
             PetSettings.KEY_RUNNING -> if (!settings.running) quit()
         }
         refreshNotification()
     }
 
+    private fun bindAux() {
+        if (auxBound) return
+        auxBound = true
+        shake = ShakeWake(this) { window?.onShake() }
+        registerSys(screenReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        })
+        registerSys(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+    }
+
     private fun ensureWindow() {
         if (!OverlayPermission.granted(this)) {
             quit()
+            return
+        }
+        val show = OverlayVisibility.shouldShow(settings.visible)
+        if (!show) {
+            window?.setVisible(false)
             return
         }
         val w = window ?: PetWindow(this).also { created ->
@@ -180,18 +190,13 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
             window = created
         }
-        try {
-            w.attach()
+        w.attach()
+        w.setVisible(true)
+        startAsForeground(lite = false)
+        main.post {
             CompanionDay.tick(this)
             CompanionMissYou.reschedule(this)
-            applyVisibility()
-        } catch (_: Throwable) {
-            quit()
         }
-    }
-
-    private fun applyVisibility() {
-        window?.setVisible(OverlayVisibility.shouldShow(settings.visible))
     }
 
     private fun teardownWindow() {
@@ -204,6 +209,7 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     private fun quit() {
+        main.removeCallbacksAndMessages(null)
         settings.running = false
         teardownWindow()
         try {
@@ -213,35 +219,33 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         stopSelf()
     }
 
-    private fun startAsForeground() {
-        val n = buildNotification()
-        if (Build.VERSION.SDK_INT >= 34) {
-            startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-        } else {
-            startForeground(NOTIF_ID, n)
+    private fun startAsForeground(lite: Boolean) {
+        val n = buildNotification(lite)
+        try {
+            if (Build.VERSION.SDK_INT >= 34) {
+                startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            } else {
+                startForeground(NOTIF_ID, n)
+            }
+        } catch (_: Throwable) {
         }
     }
 
     private fun refreshNotification() {
         if (!settings.running) return
         val nm = getSystemService(NotificationManager::class.java)
-        nm.notify(NOTIF_ID, buildNotification())
+        nm.notify(NOTIF_ID, buildNotification(lite = false))
     }
 
-    private fun buildNotification(): Notification {
+    private fun buildNotification(lite: Boolean): Notification {
         val open = PendingIntent.getActivity(
             this,
             0,
             Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             pendingFlags(),
         )
-        val hideShow = actionPi(1, ACTION_TOGGLE_VISIBLE)
-        val ghost = actionPi(2, ACTION_TOGGLE_GHOST)
-        val exit = actionPi(3, ACTION_EXIT)
-        val hideLabel = if (settings.visible) getString(R.string.notif_hide) else getString(R.string.notif_show)
-        val ghostLabel = if (settings.passThrough) getString(R.string.notif_ghost_off) else getString(R.string.notif_ghost_on)
         val text = if (settings.visible) getString(R.string.notif_text) else getString(R.string.notif_hidden_text)
-        return NotificationCompat.Builder(this, CHANNEL)
+        val builder = NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_pet)
             .setContentTitle(getString(R.string.notif_title, settings.displayName()))
             .setContentText(text)
@@ -249,12 +253,16 @@ class OverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(open)
-            .addAction(0, hideLabel, hideShow)
-            .addAction(0, ghostLabel, ghost)
-            .addAction(0, getString(R.string.notif_exit), exit)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .build()
+        if (!lite) {
+            val hideLabel = if (settings.visible) getString(R.string.notif_hide) else getString(R.string.notif_show)
+            val ghostLabel = if (settings.passThrough) getString(R.string.notif_ghost_off) else getString(R.string.notif_ghost_on)
+            builder.addAction(0, hideLabel, actionPi(1, ACTION_TOGGLE_VISIBLE))
+            builder.addAction(0, ghostLabel, actionPi(2, ACTION_TOGGLE_GHOST))
+            builder.addAction(0, getString(R.string.notif_exit), actionPi(3, ACTION_EXIT))
+        }
+        return builder.build()
     }
 
     private fun actionPi(req: Int, action: String): PendingIntent {

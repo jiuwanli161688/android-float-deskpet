@@ -1,6 +1,7 @@
 package com.floatdeskpet.app.overlay
 
 import android.animation.ValueAnimator
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -13,7 +14,6 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.PathInterpolator
 import com.floatdeskpet.app.auth.AuthStore
-import com.floatdeskpet.app.data.AlbumStore
 import com.floatdeskpet.app.data.CompanionDay
 import com.floatdeskpet.app.data.FoodCatalog
 import com.floatdeskpet.app.data.FoodItem
@@ -57,7 +57,7 @@ class PetWindow(private val context: Context) : PetActions {
         type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.CENTER
-        flags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+        flags = hwFlag() or
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         width = WindowManager.LayoutParams.MATCH_PARENT
@@ -74,7 +74,7 @@ class PetWindow(private val context: Context) : PetActions {
         gravity = Gravity.TOP or Gravity.START
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+            hwFlag() or
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
@@ -103,7 +103,7 @@ class PetWindow(private val context: Context) : PetActions {
         gravity = Gravity.TOP or Gravity.START
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+            hwFlag() or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         width = 1
         height = 1
@@ -161,12 +161,10 @@ class PetWindow(private val context: Context) : PetActions {
     }
 
     fun attach() {
-        voice.ensure()
         if (attached) {
             applySettings()
             return
         }
-        PetStats.applyDecay(settings)
         applySettings()
         if (settings.posX == PetSettings.UNSET || settings.posY == PetSettings.UNSET) {
             placeDefault()
@@ -175,17 +173,18 @@ class PetWindow(private val context: Context) : PetActions {
         try {
             wm.addView(view, params)
             attached = true
-            attachBubble()
         } catch (t: Throwable) {
             attached = false
             throw t
         }
-        CompanionDay.tick(context)
-        AlbumStore.get(context).sync(settings)
-        handler.postDelayed({ if (attached) sfx.appear() }, 120L)
+        handler.post {
+            if (!attached) return@post
+            attachBubble()
+            sfx.appear()
+        }
         handler.postDelayed({
             if (attached) say(PetDialogue.greeting(settings), 3800L)
-        }, 500L)
+        }, 600L)
         scheduleIdle()
     }
 
@@ -875,11 +874,21 @@ class PetWindow(private val context: Context) : PetActions {
 
     private fun baseFlags(): Int {
         var flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+            hwFlag() or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         if (settings.passThrough) {
             flags = flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
         }
         return flags
+    }
+
+    companion object {
+        private fun hwFlag(): Int {
+            return if (ActivityManager.isHighEndGfx()) {
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+            } else {
+                0
+            }
+        }
     }
 }
