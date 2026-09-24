@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.floatdeskpet.app.R
+import com.floatdeskpet.app.data.CharacterStyle
 import com.floatdeskpet.app.data.PetSettings
 import kotlin.math.abs
 import kotlin.math.hypot
@@ -33,7 +34,11 @@ class PetSpriteView @JvmOverloads constructor(
     var onPeekWake: (() -> Boolean)? = null
     var onMenuPet: (() -> Unit)? = null
     var onMenuFeed: (() -> Unit)? = null
+    var onMenuCardio: (() -> Unit)? = null
     var onMenuSleep: (() -> Unit)? = null
+    var inlineMenu: Boolean = true
+    var dragEnabled: Boolean = true
+    private var facingRight = true
 
     private val settings = PetSettings.get(context)
     private val image = ImageView(context).apply {
@@ -61,14 +66,23 @@ class PetSpriteView @JvmOverloads constructor(
         alpha = 0f
     }
     private val menu = LinearLayout(context).apply {
-        orientation = LinearLayout.HORIZONTAL
+        orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER
         visibility = GONE
+        setBackgroundResource(R.drawable.bg_overlay_menu)
+        val pad = (10 * resources.displayMetrics.density).toInt()
+        setPadding(pad, pad, pad, pad)
+        elevation = 8f * resources.displayMetrics.density
     }
 
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val slop = ViewConfiguration.get(context).scaledTouchSlop
+    private val longPressSlop = slop * 2
+    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
     private val minFling = ViewConfiguration.get(context).scaledMinimumFlingVelocity.toFloat()
+    private var longPressArmed = false
+    private var longPressFired = false
+    private val fireLongPress = Runnable { emitLongPress() }
 
     private var frames = PetFrames.of(settings)
     private var index = 0
@@ -92,7 +106,16 @@ class PetSpriteView @JvmOverloads constructor(
     private val cyclePoses = arrayOf(PetPose.HAPPY, PetPose.SHY, PetPose.SLEEP, PetPose.SAD)
     private val chipPet: TextView
     private val chipFeed: TextView
+    private val chipCardio: TextView
     private val chipSleep: TextView
+    private var cardioRunning = false
+    private var cardioDone: (() -> Unit)? = null
+    private val cardioBounce = ObjectAnimator.ofFloat(image, "translationY", 0f, -18f).apply {
+        duration = 280
+        repeatMode = ObjectAnimator.REVERSE
+        repeatCount = ObjectAnimator.INFINITE
+        interpolator = PathInterpolator(0.42f, 0f, 0.58f, 1f)
+    }
 
     private val breath = ObjectAnimator.ofFloat(image, "translationY", 0f, -5.2f).apply {
         duration = 2300
@@ -156,10 +179,7 @@ class PetSpriteView @JvmOverloads constructor(
             }
 
             override fun onLongPress(e: MotionEvent) {
-                if (dragging || peeking) return
-                suppressDrag = true
-                showMenu()
-                onLongPressAction?.invoke()
+                emitLongPress()
             }
         },
     )
@@ -178,10 +198,23 @@ class PetSpriteView @JvmOverloads constructor(
         )
         chipPet = chip("") { hideMenu(); onMenuPet?.invoke() }
         chipFeed = chip("") { hideMenu(); onMenuFeed?.invoke() }
+        chipCardio = chip("") { hideMenu(); onMenuCardio?.invoke() }
         chipSleep = chip("") { hideMenu(); onMenuSleep?.invoke() }
-        menu.addView(chipPet)
-        menu.addView(chipFeed)
-        menu.addView(chipSleep)
+        val row1 = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        val row2 = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        row1.addView(chipPet)
+        row1.addView(chipFeed)
+        row2.addView(chipCardio)
+        row2.addView(chipSleep)
+        menu.orientation = LinearLayout.VERTICAL
+        menu.addView(row1)
+        menu.addView(row2)
         addView(
             menu,
             LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER).apply {
@@ -196,10 +229,24 @@ class PetSpriteView @JvmOverloads constructor(
     fun applyCharacter() {
         frames = PetFrames.of(settings)
         image.setImageResource(if (napping) frames.sleep else idleFrame())
+        CharacterStyle.tint(image, settings)
         val name = settings.displayName()
         contentDescription = name
         image.contentDescription = name
+        restoreFacing()
         refreshMenuLabels()
+        image.invalidate()
+        invalidate()
+    }
+
+    fun embedBubble() {
+        if (speechBubble.parent != null) return
+        addView(
+            speechBubble,
+            LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
+                topMargin = dp(4)
+            },
+        )
     }
 
     fun setWalking(value: Boolean) {
@@ -257,8 +304,17 @@ class PetSpriteView @JvmOverloads constructor(
     fun pauseAnim() {
         paused = true
         handler.removeCallbacks(tick)
+        handler.removeCallbacks(cardioEnd)
         if (breath.isStarted) breath.cancel()
+        cardioBounce.cancel()
         image.translationY = 0f
+        if (cardioRunning) {
+            cardioRunning = false
+            reacting = false
+            val cb = cardioDone
+            cardioDone = null
+            cb?.invoke()
+        }
     }
 
     fun resumeAnim() {
@@ -288,14 +344,85 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     fun setFacingRight(right: Boolean) {
-        val s = if (right) 1f else -1f
-        if (abs(image.scaleX - s) < 0.04f) return
+        if (right == facingRight && abs(image.rotationY) < 1f && abs(image.scaleX) > 0.9f) return
         image.animate().cancel()
+        val density = resources.displayMetrics.density
+        image.cameraDistance = 48f * 160f * density
+        val tilt = if (right) -16f else 16f
+        val slide = if (right) 5f else -5f
         image.animate()
-            .scaleX(s)
-            .setDuration(260L)
-            .setInterpolator(PathInterpolator(0.42f, 0f, 0.58f, 1f))
+            .rotationY(tilt)
+            .translationX(slide)
+            .setDuration(90L)
+            .setInterpolator(PathInterpolator(0.3f, 0f, 0.5f, 1f))
+            .withEndAction {
+                facingRight = right
+                image.scaleX = if (right) 1f else -1f
+                image.scaleY = 1f
+                image.animate()
+                    .rotationY(0f)
+                    .translationX(0f)
+                    .setDuration(130L)
+                    .setInterpolator(PathInterpolator(0.2f, 0f, 0.2f, 1f))
+                    .withEndAction { restoreFacing() }
+                    .start()
+            }
             .start()
+    }
+
+    private fun restoreFacing() {
+        image.rotationY = 0f
+        image.rotationX = 0f
+        image.translationX = 0f
+        image.scaleY = 1f
+        image.scaleX = if (facingRight) 1f else -1f
+    }
+
+    fun playCardio(durationMs: Long = 4500L, done: (() -> Unit)? = null) {
+        if (peeking) return
+        if (napping) setNapping(false)
+        cardioDone = done
+        cardioRunning = true
+        reacting = true
+        index = 0
+        reactSeq = cardioSeq()
+        if (breath.isStarted) breath.cancel()
+        image.translationY = 0f
+        cardioBounce.cancel()
+        cardioBounce.start()
+        handler.removeCallbacks(cardioEnd)
+        handler.postDelayed(cardioEnd, durationMs)
+        handler.removeCallbacks(tick)
+        handler.post(tick)
+    }
+
+    private val cardioEnd = Runnable {
+        cardioBounce.cancel()
+        image.translationY = 0f
+        cardioRunning = false
+        reacting = false
+        index = 0
+        image.setImageResource(idleFrame())
+        restartBreath()
+        val cb = cardioDone
+        cardioDone = null
+        cb?.invoke()
+        if (!paused && !peeking) {
+            handler.removeCallbacks(tick)
+            handler.post(tick)
+        }
+    }
+
+    private fun cardioSeq(): IntArray {
+        val jump = frames.tapJump
+        val wave = frames.tapWave
+        return intArrayOf(
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+            jump, jump, wave, jump, jump, wave, jump, wave,
+        )
     }
 
     fun playReaction(pose: PetPose) {
@@ -367,6 +494,7 @@ class PetSpriteView @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         handler.removeCallbacks(tick)
         handler.removeCallbacks(hideBubble)
+        handler.removeCallbacks(fireLongPress)
         breath.cancel()
         image.translationY = 0f
         tracker?.recycle()
@@ -387,14 +515,29 @@ class PetSpriteView @JvmOverloads constructor(
                 downY = event.rawY
                 dragging = false
                 suppressDrag = false
-                parent?.requestDisallowInterceptTouchEvent(true)
+                longPressFired = false
+                longPressArmed = true
+                handler.removeCallbacks(fireLongPress)
+                handler.postDelayed(fireLongPress, longPressTimeout)
+                parent?.requestDisallowInterceptTouchEvent(dragEnabled)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
+                val dist = hypot(event.rawX - downX, event.rawY - downY)
+                if (longPressArmed && dist > longPressSlop) {
+                    handler.removeCallbacks(fireLongPress)
+                    longPressArmed = false
+                }
+                if (!dragEnabled) {
+                    if (dist > slop) {
+                        parent?.requestDisallowInterceptTouchEvent(false)
+                    }
+                    return true
+                }
                 if (suppressDrag) return true
                 val dx = (event.rawX - lastX).toInt()
                 val dy = (event.rawY - lastY).toInt()
-                if (!dragging && (abs(event.rawX - downX) > slop || abs(event.rawY - downY) > slop)) {
+                if (!dragging && dist > longPressSlop) {
                     dragging = true
                     hideMenu()
                 }
@@ -406,6 +549,8 @@ class PetSpriteView @JvmOverloads constructor(
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                handler.removeCallbacks(fireLongPress)
+                longPressArmed = false
                 val wasDragging = dragging
                 dragging = false
                 suppressDrag = false
@@ -451,7 +596,19 @@ class PetSpriteView @JvmOverloads constructor(
     private fun refreshMenuLabels() {
         chipPet.text = context.getString(if (settings.isMale) R.string.menu_pet_m else R.string.menu_pet)
         chipFeed.text = context.getString(if (settings.isMale) R.string.menu_feed_m else R.string.menu_feed)
+        chipCardio.text = context.getString(R.string.menu_cardio)
         chipSleep.text = context.getString(if (settings.isMale) R.string.menu_sleep_m else R.string.menu_sleep)
+    }
+
+    private fun emitLongPress() {
+        if (longPressFired || dragging) return
+        if (peeking && inlineMenu) return
+        longPressFired = true
+        longPressArmed = false
+        handler.removeCallbacks(fireLongPress)
+        suppressDrag = true
+        if (inlineMenu) showMenu()
+        onLongPressAction?.invoke()
     }
 
     private fun showMenu() {
@@ -509,15 +666,17 @@ class PetSpriteView @JvmOverloads constructor(
     }
 
     private fun chip(label: String, click: () -> Unit): TextView {
-        val padH = dp(10)
-        val padV = dp(6)
+        val padH = dp(14)
+        val padV = dp(9)
         val gap = dp(4)
         return TextView(context).apply {
             text = label
+            minHeight = dp(40)
+            gravity = Gravity.CENTER
             setPadding(padH, padV, padH, padV)
-            setBackgroundResource(R.drawable.bg_menu_chip)
+            setBackgroundResource(R.drawable.bg_overlay_menu_item)
             setTextColor(context.getColor(R.color.text_main))
-            textSize = 12f
+            textSize = 13f
             setOnClickListener { click() }
             val lp = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             lp.marginStart = gap

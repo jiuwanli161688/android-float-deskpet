@@ -1,6 +1,7 @@
 package com.floatdeskpet.app.overlay
 
 import com.floatdeskpet.app.R
+import com.floatdeskpet.app.data.CharacterStyle
 import com.floatdeskpet.app.data.PetSettings
 
 enum class PetPose {
@@ -31,7 +32,13 @@ data class FrameSet(
 }
 
 object PetFrames {
-    fun of(settings: PetSettings): FrameSet = of(settings.gender, settings.outfit)
+    fun of(settings: PetSettings): FrameSet {
+        val style = settings.resolvedStyle()
+        if (settings.outfit != style.suggestedOutfit) {
+            return of(settings.gender, settings.outfit)
+        }
+        return dedicated(style) ?: of(settings.gender, settings.outfit)
+    }
 
     fun of(gender: String, outfit: String): FrameSet {
         if (gender == PetSettings.GENDER_MALE) {
@@ -83,6 +90,83 @@ object PetFrames {
                 tapWave = R.drawable.pet_tap_1,
                 sleep = R.drawable.pet_sleep_0,
                 shy = R.drawable.pet_shy_0,
+            )
+        }
+    }
+
+    fun dedicated(style: CharacterStyle): FrameSet? {
+        return when (style) {
+            CharacterStyle.YUJIE -> FrameSet(
+                idle = R.drawable.pet_f_yujie_idle,
+                blink = R.drawable.pet_f_yujie_blink,
+                tilt = R.drawable.pet_f_yujie_idle,
+                tapJump = R.drawable.pet_f_yujie_wave,
+                tapWave = R.drawable.pet_f_yujie_wave,
+                sleep = R.drawable.pet_f_yujie_blink,
+                shy = R.drawable.pet_f_yujie_idle,
+            )
+            CharacterStyle.LUOLI -> FrameSet(
+                idle = R.drawable.pet_f_luoli_idle,
+                blink = R.drawable.pet_f_luoli_blink,
+                tilt = R.drawable.pet_f_luoli_idle,
+                tapJump = R.drawable.pet_f_luoli_wave,
+                tapWave = R.drawable.pet_f_luoli_wave,
+                sleep = R.drawable.pet_f_luoli_blink,
+                shy = R.drawable.pet_f_luoli_idle,
+            )
+            CharacterStyle.QINGCHUN -> FrameSet(
+                idle = R.drawable.pet_f_qingchun_idle,
+                blink = R.drawable.pet_f_qingchun_blink,
+                tilt = R.drawable.pet_f_qingchun_idle,
+                tapJump = R.drawable.pet_f_qingchun_wave,
+                tapWave = R.drawable.pet_f_qingchun_wave,
+                sleep = R.drawable.pet_f_qingchun_blink,
+                shy = R.drawable.pet_f_qingchun_idle,
+            )
+            CharacterStyle.DASHU -> FrameSet(
+                idle = R.drawable.pet_m_dashu_idle,
+                blink = R.drawable.pet_m_dashu_blink,
+                tilt = R.drawable.pet_m_dashu_idle,
+                tapJump = R.drawable.pet_m_dashu_wave,
+                tapWave = R.drawable.pet_m_dashu_wave,
+                sleep = R.drawable.pet_m_dashu_blink,
+                shy = R.drawable.pet_m_dashu_idle,
+            )
+            CharacterStyle.WENROU -> FrameSet(
+                idle = R.drawable.pet_m_wenrou_idle,
+                blink = R.drawable.pet_m_wenrou_blink,
+                tilt = R.drawable.pet_m_wenrou_idle,
+                tapJump = R.drawable.pet_m_wenrou_wave,
+                tapWave = R.drawable.pet_m_wenrou_wave,
+                sleep = R.drawable.pet_m_wenrou_blink,
+                shy = R.drawable.pet_m_wenrou_idle,
+            )
+            CharacterStyle.QINGSHUANG -> FrameSet(
+                idle = R.drawable.pet_m_qingshuang_idle,
+                blink = R.drawable.pet_m_qingshuang_blink,
+                tilt = R.drawable.pet_m_qingshuang_idle,
+                tapJump = R.drawable.pet_m_qingshuang_wave,
+                tapWave = R.drawable.pet_m_qingshuang_wave,
+                sleep = R.drawable.pet_m_qingshuang_blink,
+                shy = R.drawable.pet_m_qingshuang_idle,
+            )
+            CharacterStyle.CHENWEN -> FrameSet(
+                idle = R.drawable.pet_m_chenwen_idle,
+                blink = R.drawable.pet_m_chenwen_blink,
+                tilt = R.drawable.pet_m_chenwen_idle,
+                tapJump = R.drawable.pet_m_chenwen_wave,
+                tapWave = R.drawable.pet_m_chenwen_wave,
+                sleep = R.drawable.pet_m_chenwen_blink,
+                shy = R.drawable.pet_m_chenwen_idle,
+            )
+            CharacterStyle.CHENGGONG -> FrameSet(
+                idle = R.drawable.pet_m_chenggong_idle,
+                blink = R.drawable.pet_m_chenggong_blink,
+                tilt = R.drawable.pet_m_chenggong_idle,
+                tapJump = R.drawable.pet_m_chenggong_wave,
+                tapWave = R.drawable.pet_m_chenggong_wave,
+                sleep = R.drawable.pet_m_chenggong_blink,
+                shy = R.drawable.pet_m_chenggong_idle,
             )
         }
     }

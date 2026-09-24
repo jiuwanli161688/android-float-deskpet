@@ -6,14 +6,16 @@
         <item name="colorPrimaryContainer">@color/primary_container</item>
         <item name="colorOnPrimaryContainer">@color/on_primary_container</item>
         <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorTertiary">@color/mint</item>
         <item name="android:colorBackground">@color/bg</item>
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/text_main</item>
         <item name="colorOnSurfaceVariant">@color/text_muted</item>
         <item name="colorOutline">@color/outline</item>
-        <item name="android:statusBarColor">@color/bg</item>
-        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:statusBarColor">@color/dusk_start</item>
+        <item name="android:navigationBarColor">@color/dusk_end</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:windowBackground">@drawable/bg_home</item>
     </style>
 </resources>

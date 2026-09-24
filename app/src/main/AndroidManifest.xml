@@ -35,15 +35,51 @@
         </activity>
 
         <activity
+            android:name=".ui.GuideActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FloatDeskPet" />
+
+        <activity
+            android:name=".ui.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FloatDeskPet"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FloatDeskPet"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".ui.SetupActivity"
             android:exported="false"
             android:theme="@style/Theme.FloatDeskPet"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".ui.ProfileActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.FloatDeskPet" />
+
+        <activity
             android:name=".ui.PrivacyActivity"
             android:exported="false"
-            android:parentActivityName=".ui.MainActivity" />
+            android:parentActivityName=".ui.ProfileActivity" />
+
+        <activity
+            android:name=".ui.AlbumActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.FloatDeskPet" />
+
+        <activity
+            android:name=".ui.WhisperActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.FloatDeskPet"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".overlay.OverlayService"
@@ -57,6 +93,15 @@
         <receiver
             android:name=".overlay.OverlayActionReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".data.MissYouReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.floatdeskpet.app.MISS_YOU" />
+                <action android:name="com.floatdeskpet.app.MISS_YOU_OFF" />
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name=".boot.BootReceiver"
