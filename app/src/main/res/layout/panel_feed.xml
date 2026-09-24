@@ -11,11 +11,15 @@
         android:background="@color/scrim" />
 
     <LinearLayout
+        android:id="@+id/feedCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginHorizontal="22dp"
         android:background="@drawable/bg_card"
+        android:clickable="true"
+        android:elevation="16dp"
+        android:focusable="true"
         android:orientation="vertical"
         android:padding="18dp">
 
@@ -24,7 +28,7 @@
             android:layout_height="wrap_content"
             android:text="@string/feed_title"
             android:textColor="@color/text_main"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <TextView
@@ -69,7 +73,7 @@
             android:id="@+id/btnFeedClose"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="@string/feed_close" />
     </LinearLayout>
 </FrameLayout>

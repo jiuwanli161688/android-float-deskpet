@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="320dp"
     android:layout_height="match_parent"
-    android:background="@color/surface"
+    android:background="@drawable/bg_panel"
     android:clickable="true"
-    android:elevation="12dp"
+    android:elevation="16dp"
     android:fitsSystemWindows="true"
     android:focusable="true"
     android:orientation="vertical">
@@ -26,14 +26,14 @@
             android:layout_weight="1"
             android:text="@string/panel_title"
             android:textColor="@color/text_main"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClosePanel"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:minWidth="0dp"
             android:text="@string/panel_close" />
     </LinearLayout>
@@ -54,468 +54,497 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_card"
+                android:background="@drawable/bg_hub"
+                android:elevation="4dp"
                 android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    tools:text="@string/status_stopped" />
+                android:padding="10dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnToggle"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/start_pet" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchAlways"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/always_show_title"
-                    android:textColor="@color/text_main" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/always_show_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/section_remind"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchMissYou"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:checked="false"
-                    android:text="@string/miss_you_title_switch"
-                    android:textColor="@color/text_main" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/miss_you_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/section_sound"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchMute"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/mute_title"
-                    android:textColor="@color/text_main" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/mute_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchTts"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/tts_title"
-                    android:textColor="@color/text_main" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tts_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/permCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/perm_title"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPermission"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/perm_action" />
-
-                <TextView
-                    android:id="@+id/notifHint"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/notif_perm_hint"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnNotif"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/notif_perm_action" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/section_look"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/labelSize"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textColor="@color/text_muted"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/sliderSize"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:stepSize="4"
-                    android:valueFrom="100"
-                    android:valueTo="220" />
-
-                <TextView
-                    android:id="@+id/labelOpacity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="@color/text_muted"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/sliderOpacity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:stepSize="5"
-                    android:valueFrom="30"
-                    android:valueTo="100" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/label_character"
-                    android:textColor="@color/text_muted"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/genderGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:orientation="horizontal"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/genderFemale"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/gender_female" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/genderMale"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/gender_male" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/label_style"
-                    android:textColor="@color/text_muted"
-                    android:textSize="13sp" />
-
-                <ImageView
-                    android:id="@+id/stylePreview"
-                    android:layout_width="120dp"
-                    android:layout_height="160dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
-                    android:contentDescription="@string/label_style"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/pet_f_qingchun_idle" />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/styleGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    app:selectionRequired="true"
-                    app:singleSelection="true" />
-
-                <TextView
-                    android:id="@+id/styleBlurb"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/nameLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:hint="@string/label_name">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/inputName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:imeOptions="actionDone"
-                        android:inputType="textPersonName"
-                        android:maxLength="12"
-                        android:singleLine="true" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnChangeCharacter"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/change_character" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/label_outfit"
-                    android:textColor="@color/text_muted"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/outfitGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:orientation="horizontal"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/outfitCasual"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/outfit_casual" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/outfitPajama"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/outfit_pajama" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/outfitHoodie"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/outfit_hoodie" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
-                <TextView
-                    android:id="@+id/outfitDesc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/outfit_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/section_feel"
-                    android:textColor="@color/text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/statsLine"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="@color/text_main"
-                    android:textSize="14sp"
-                    tools:text="@string/stats_line" />
-
-                <TextView
-                    android:id="@+id/happyHint"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp"
-                    tools:text="幸福会慢慢回来" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/stats_desc"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
+                    android:id="@+id/hubCompanion"
+                    style="@style/HubHeader"
+                    android:text="@string/hub_companion" />
 
                 <LinearLayout
+                    android:id="@+id/bodyCompanion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:id="@+id/status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_main"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        tools:text="@string/status_stopped" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnToggle"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/start_pet" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRest"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/stop_pet"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchAlways"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:minHeight="44dp"
+                        android:text="@string/always_show_title"
+                        android:textColor="@color/text_main" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/always_show_desc"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_hub"
+                android:elevation="4dp"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/hubInteract"
+                    style="@style/HubHeader"
+                    android:text="@string/hub_interact" />
+
+                <LinearLayout
+                    android:id="@+id/bodyInteract"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/statsLine"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_main"
+                        android:textSize="14sp"
+                        tools:text="@string/stats_line" />
+
+                    <TextView
+                        android:id="@+id/happyHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp"
+                        tools:text="幸福会慢慢回来" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/stats_desc"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFeed"
                         style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="10dp"
                         android:text="@string/action_feed" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCardio"
                         style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="8dp"
                         android:text="@string/action_cardio" />
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/section_account"
-                android:textColor="@color/text_muted"
-                android:textSize="12sp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAlbum"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/album_open" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnProfile"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/panel_profile" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRest"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="4dp"
-                android:text="@string/stop_pet"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/privacyLink"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:padding="8dp"
-                android:text="@string/privacy_link"
-                android:textColor="@color/primary"
-                android:textSize="14sp" />
+                android:background="@drawable/bg_hub"
+                android:elevation="4dp"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/hubLook"
+                    style="@style/HubHeader"
+                    android:text="@string/hub_look" />
+
+                <LinearLayout
+                    android:id="@+id/bodyLook"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/labelSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:stepSize="4"
+                        android:valueFrom="100"
+                        android:valueTo="220" />
+
+                    <TextView
+                        android:id="@+id/labelOpacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderOpacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:stepSize="5"
+                        android:valueFrom="30"
+                        android:valueTo="100" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/gender_locked"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/genderGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/genderFemale"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/gender_female" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/genderMale"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/gender_male" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/label_style"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+
+                    <ImageView
+                        android:id="@+id/stylePreview"
+                        android:layout_width="120dp"
+                        android:layout_height="160dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="8dp"
+                        android:contentDescription="@string/label_style"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pet_f_qingchun_idle" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/styleGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        app:selectionRequired="true"
+                        app:singleSelection="true" />
+
+                    <TextView
+                        android:id="@+id/styleBlurb"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/nameLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="@string/label_name">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/inputName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionDone"
+                            android:inputType="textPersonName"
+                            android:maxLength="12"
+                            android:singleLine="true" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnChangeCharacter"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="@string/change_character" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/label_outfit"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/outfitGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/outfitCasual"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="@string/outfit_casual" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/outfitPajama"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="@string/outfit_pajama" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/outfitHoodie"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="@string/outfit_hoodie" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <TextView
+                        android:id="@+id/outfitDesc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/outfit_desc"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_hub"
+                android:elevation="4dp"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/hubNest"
+                    style="@style/HubHeader"
+                    android:text="@string/hub_nest" />
+
+                <LinearLayout
+                    android:id="@+id/bodyNest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAlbum"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="@string/album_open" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnWhisper"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/whisper_open" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProfile"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/panel_profile" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_hub"
+                android:elevation="4dp"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/hubSettings"
+                    style="@style/HubHeader"
+                    android:text="@string/hub_settings" />
+
+                <LinearLayout
+                    android:id="@+id/bodySettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchMute"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="44dp"
+                        android:text="@string/mute_title"
+                        android:textColor="@color/text_main" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/mute_desc"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchTts"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:minHeight="44dp"
+                        android:text="@string/tts_title"
+                        android:textColor="@color/text_main" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tts_desc"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchMissYou"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:checked="false"
+                        android:minHeight="44dp"
+                        android:text="@string/miss_you_title_switch"
+                        android:textColor="@color/text_main" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/miss_you_desc"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:id="@+id/permCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/perm_title"
+                            android:textColor="@color/text_main"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPermission"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/perm_action" />
+
+                        <TextView
+                            android:id="@+id/notifHint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/notif_perm_hint"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnNotif"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/notif_perm_action" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/privacyLink"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center"
+                        android:text="@string/privacy_link"
+                        android:textColor="@color/primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -175,19 +175,23 @@ class PetSettings private constructor(context: Context) {
     }
 
     fun applySetup(male: Boolean, name: String) {
-        gender = if (male) GENDER_MALE else GENDER_FEMALE
+        val lockedMale = if (configured) isMale else male
+        if (!configured) {
+            gender = if (lockedMale) GENDER_MALE else GENDER_FEMALE
+        }
         val trimmed = name.trim()
-        petName = trimmed.ifEmpty { takeDefaultName(male) }
-        val kept = CharacterStyle.fromId(style, male)
+        petName = trimmed.ifEmpty { takeDefaultName(lockedMale) }
+        val kept = CharacterStyle.fromId(style, lockedMale)
         if (style.isBlank() || kept.id != style) {
-            applyStyle(CharacterStyle.defaultOf(male))
-        } else if (male && outfit == OUTFIT_PAJAMA) {
+            applyStyle(CharacterStyle.defaultOf(lockedMale))
+        } else if (lockedMale && outfit == OUTFIT_PAJAMA) {
             outfit = OUTFIT_CASUAL
         }
         configured = true
     }
 
     fun applyGender(male: Boolean) {
+        if (configured) return
         val oldDefault = defaultName(!male)
         gender = if (male) GENDER_MALE else GENDER_FEMALE
         if (petName.isBlank() || petName == oldDefault || NameBank.pool(!male).contains(petName)) {

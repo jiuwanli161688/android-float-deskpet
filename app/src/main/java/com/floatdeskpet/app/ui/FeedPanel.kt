@@ -5,8 +5,6 @@ import android.os.SystemClock
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.SoundEffectConstants
 import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
@@ -36,9 +34,10 @@ class FeedPanel(
     init {
         binding = PanelFeedBinding.inflate(LayoutInflater.from(context))
         root = binding.root
-        bindTap(binding.feedScrim) { onClose() }
-        bindTap(binding.btnFeedClose) { onClose() }
-        bindTap(binding.btnFeedConfirm) { confirm() }
+        binding.feedCard.isClickable = true
+        binding.feedScrim.setOnClickListener { onClose() }
+        binding.btnFeedClose.setOnClickListener { onClose() }
+        binding.btnFeedConfirm.setOnClickListener { confirm() }
         FoodKind.entries.forEach { tab ->
             val chip = Chip(context, null, com.google.android.material.R.attr.chipStyle).apply {
                 text = tab.title
@@ -97,6 +96,8 @@ class FeedPanel(
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
+            isClickable = true
+            isFocusable = true
             setBackgroundResource(if (selected) R.drawable.bg_card_selected else R.drawable.bg_food_cell)
             val pad = dp(8)
             setPadding(pad, dp(10), pad, dp(10))
@@ -121,33 +122,6 @@ class FeedPanel(
                 picked = food
                 renderGrid()
                 bindHint()
-            }
-        }
-    }
-
-    private fun bindTap(view: View, block: () -> Unit) {
-        view.isClickable = true
-        view.isFocusable = true
-        view.setOnClickListener { block() }
-        view.setOnTouchListener { v, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    v.isPressed = true
-                    true
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    v.isPressed = false
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    v.isPressed = false
-                    if (event.x >= 0 && event.y >= 0 && event.x <= v.width && event.y <= v.height) {
-                        v.playSoundEffect(SoundEffectConstants.CLICK)
-                        block()
-                    }
-                    true
-                }
-                else -> false
             }
         }
     }

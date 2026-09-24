@@ -5,6 +5,22 @@
 
     <string name="home_title">今日陪伴</string>
     <string name="home_subtitle">先坐一会儿，有人在窗边等你。</string>
+    <string name="hub_companion">陪伴</string>
+    <string name="hub_interact">互动</string>
+    <string name="hub_look">装扮</string>
+    <string name="hub_nest">小窝</string>
+    <string name="hub_settings">设置</string>
+    <string name="gender_locked">性别在第一次选定后就不能改了。风格和衣服还可以换。</string>
+    <string name="whisper_title">悄悄话</string>
+    <string name="whisper_open">写一句悄悄话</string>
+    <string name="whisper_home_hint">想跟 TA 说一句，只留在这台手机，不会发出去。</string>
+    <string name="whisper_hint">写给 TA 的话，只存在这里。最多八十个字。</string>
+    <string name="whisper_hint_empty">先写一句再放下。</string>
+    <string name="whisper_input_hint">跟 TA 说…</string>
+    <string name="whisper_send">放下</string>
+    <string name="whisper_empty">还没有悄悄话。写一句放下就好。</string>
+    <string name="whisper_saved">我收下了。</string>
+    <string name="whisper_delete">收起这句</string>
     <string name="home_menu_hint">右下角那颗小按钮，可以换衣服、叫 TA 过来。</string>
     <string name="home_mood_happy">%1$s今天心情很好，想被多看看。</string>
     <string name="home_mood_ok">%1$s安安静静待着，并不远。</string>
@@ -43,15 +59,15 @@
     <string name="label_style">更换角色风格</string>
     <string name="gender_female">女</string>
     <string name="gender_male">男</string>
-    <string name="change_character">重新认识 TA</string>
+    <string name="change_character">改个称呼</string>
     <string name="label_outfit">换装</string>
     <string name="outfit_casual">日常</string>
     <string name="outfit_pajama">睡衣</string>
     <string name="outfit_hoodie">出行</string>
-    <string name="outfit_desc">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
-    <string name="outfit_desc_f">衣服都存在手机里，可随时换。女生有日常、睡衣和出行。</string>
-    <string name="outfit_desc_m">衣服都存在手机里，可随时换。男生目前有日常和出行。</string>
-    <string name="outfit_desc_style">这身造型跟着风格走：发型、体型和衣服轮廓都会换。想换味道，点上面的风格就好。</string>
+    <string name="outfit_desc">点衣服会立刻换上。男生有日常和出行。</string>
+    <string name="outfit_desc_f">点衣服会立刻换上。女生有日常、睡衣和出行。</string>
+    <string name="outfit_desc_m">点衣服会立刻换上。男生有日常和出行。</string>
+    <string name="outfit_desc_style">风格默认穿着专属造型。再点下面的衣服，会换成对应的日常/睡衣/出行。</string>
 
     <string name="style_yujie">御姐</string>
     <string name="style_luoli">萝莉</string>
@@ -129,10 +145,10 @@
     <string name="privacy_link">这份陪伴的小心事</string>
 
     <string name="privacy_title">这份陪伴的小心事</string>
-    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会把你的账号、对话或幸福点送到别处，更不会展示广告。\n\n本机保存的内容仅包括：你留下的账号、暗号和称呼、幸福点、角色性别与名字、风格、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、是否下次还来、是否正在运行、连续来过的日子、今日小事、关系远近、偶尔想起你的开关、图鉴里亮过的卡片。这些都只留在这台手机上，卸载即清除。\n\n「显示在其他应用上层」只用于画出透明的角色小窗，应用不会读取其它应用的界面内容。\n\n通知权限用于常驻通知（运行中 / 显示或隐藏 / 退出），以及你主动打开的「偶尔想你了再提醒我」。电量提示只读系统电池状态。气泡语音只用系统朗读，不访问云，也不申请网络权限。句子都写在手机里，不会向别处要话。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
+    <string name="privacy_body">悬浮桌宠是本地应用。核心功能不申请网络权限，也不会把你的账号、对话或幸福点送到别处，更不会展示广告。\n\n本机保存的内容仅包括：你留下的账号、暗号和称呼、幸福点、角色性别与名字、风格、桌宠位置、大小、透明度、换装、静音、语音开关、心情、亲密度、是否下次还来、是否正在运行、连续来过的日子、今日小事、关系远近、偶尔想起你的开关、图鉴里亮过的卡片、写给 TA 的悄悄话。这些都只留在这台手机上，卸载即清除。\n\n「显示在其他应用上层」只用于画出透明的角色小窗，应用不会读取其它应用的界面内容。\n\n通知权限用于常驻通知（运行中 / 显示或隐藏 / 退出），以及你主动打开的「偶尔想你了再提醒我」。电量提示只读系统电池状态。气泡语音只用系统朗读，不访问云，也不申请网络权限。句子都写在手机里，不会向别处要话。悄悄话也只存在这台手机，不是对话，也不会联网。\n\n如果你撤回悬浮窗权限，桌宠会自动卸下窗口并停止服务，不会留下残影。</string>
 
     <string name="setup_gender_title">想让谁陪着你</string>
-    <string name="setup_gender_body">先选一位。不确定的话，就从他开始。之后还能改。</string>
+    <string name="setup_gender_body">先选一位。不确定的话，就从他开始。选好以后就不能再改了。</string>
     <string name="setup_female_label">想被她陪着</string>
     <string name="setup_male_label">想被他陪着</string>
     <string name="setup_next">下一步</string>
@@ -160,7 +176,7 @@
     <string name="profile_account">账号  %1$s</string>
     <string name="profile_happiness">幸福点  %1$d</string>
     <string name="profile_happiness_hint">摸摸会悄悄多一点，投喂会花掉一点。每天也会慢慢补回来一点。只记在这台手机上。</string>
-    <string name="profile_redo">重新认识 TA</string>
+    <string name="profile_redo">改个称呼</string>
     <string name="profile_privacy">这份陪伴的小心事</string>
     <string name="profile_logout">先离开一会儿</string>
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg">
+    android:background="@drawable/bg_home">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingTop="20dp"
-            android:paddingBottom="120dp">
+            android:paddingBottom="140dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -25,14 +25,28 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/home_title"
-                    android:textColor="@color/text_main"
-                    android:textSize="26sp"
-                    android:textStyle="bold" />
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_title"
+                        android:textColor="@color/text_main"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/home_subtitle"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/profileChip"
@@ -50,13 +64,14 @@
                 android:id="@+id/todayCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="18dp"
                 android:background="@drawable/bg_card"
                 android:clickable="true"
+                android:elevation="6dp"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -71,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:textColor="@color/text_main"
-                    android:textSize="22sp"
+                    android:textSize="26sp"
                     android:textStyle="bold"
                     tools:text="午安，歇一会儿" />
 
@@ -79,7 +94,7 @@
                     android:id="@+id/scheduleLine"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:background="@drawable/bg_goal_off"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="8dp"
@@ -93,11 +108,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_hero"
+                android:elevation="8dp"
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
                 android:paddingHorizontal="16dp"
                 android:paddingTop="8dp"
-                android:paddingBottom="12dp">
+                android:paddingBottom="14dp">
 
                 <FrameLayout
                     android:layout_width="260dp"
@@ -124,7 +140,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/text_main"
-                    android:textSize="18sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     tools:text="你好，我是予安" />
             </LinearLayout>
@@ -135,8 +151,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_card"
+                android:elevation="6dp"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -150,7 +167,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textColor="@color/text_main"
-                        android:textSize="16sp"
+                        android:textSize="17sp"
                         android:textStyle="bold"
                         tools:text="关系 · 熟络" />
 
@@ -167,7 +184,7 @@
                     android:id="@+id/bondBar"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="6dp"
+                    android:layout_height="8dp"
                     android:layout_marginTop="8dp"
                     android:max="100"
                     android:progressBackgroundTint="@color/outline"
@@ -255,6 +272,37 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/whisperCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_card"
+                android:clickable="true"
+                android:elevation="6dp"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:minHeight="72dp"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/whisper_open"
+                    android:textColor="@color/text_main"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/whisper_home_hint"
+                    android:textColor="@color/text_muted"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/status"
                 android:layout_width="match_parent"
@@ -271,6 +319,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_card"
+                android:elevation="6dp"
                 android:orientation="vertical"
                 android:padding="16dp"
                 android:visibility="gone"
@@ -320,6 +369,15 @@
         </LinearLayout>
     </ScrollView>
 
+    <View
+        android:id="@+id/scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/scrim"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabMenu"
         android:layout_width="wrap_content"
@@ -329,24 +387,69 @@
         android:layout_marginBottom="24dp"
         android:contentDescription="@string/menu_fab"
         android:src="@drawable/ic_menu_arrange"
-        app:backgroundTint="@color/primary_container"
+        app:backgroundTint="@color/primary"
         app:borderWidth="0dp"
-        app:elevation="8dp"
+        app:elevation="10dp"
         app:fabCustomSize="58dp"
         app:maxImageSize="26dp"
-        app:pressedTranslationZ="4dp"
-        app:rippleColor="@color/primary"
+        app:pressedTranslationZ="6dp"
+        app:rippleColor="@color/blush"
         app:shapeAppearanceOverlay="@style/FabArrange"
-        app:tint="@color/on_primary_container" />
+        app:tint="@color/on_primary" />
 
-    <View
-        android:id="@+id/scrim"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/scrim"
+    <LinearLayout
+        android:id="@+id/fabSheet"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="96dp"
+        android:background="@drawable/bg_card"
         android:clickable="true"
+        android:elevation="16dp"
         android:focusable="true"
-        android:visibility="gone" />
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:paddingBottom="6dp"
+            android:text="@string/panel_title"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fabHubCompanion"
+            style="@style/HubHeader"
+            android:text="@string/hub_companion" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fabHubInteract"
+            style="@style/HubHeader"
+            android:layout_marginTop="6dp"
+            android:text="@string/hub_interact" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fabHubLook"
+            style="@style/HubHeader"
+            android:layout_marginTop="6dp"
+            android:text="@string/hub_look" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fabHubNest"
+            style="@style/HubHeader"
+            android:layout_marginTop="6dp"
+            android:text="@string/hub_nest" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fabHubSettings"
+            style="@style/HubHeader"
+            android:layout_marginTop="6dp"
+            android:text="@string/hub_settings" />
+    </LinearLayout>
 
     <include
         android:id="@+id/panel"

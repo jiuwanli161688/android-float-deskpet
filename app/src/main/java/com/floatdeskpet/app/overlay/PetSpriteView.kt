@@ -235,6 +235,8 @@ class PetSpriteView @JvmOverloads constructor(
         image.contentDescription = name
         restoreFacing()
         refreshMenuLabels()
+        image.invalidate()
+        invalidate()
     }
 
     fun embedBubble() {

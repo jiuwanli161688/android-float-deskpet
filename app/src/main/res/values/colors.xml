@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#C45C26</color>
+    <color name="primary">#D94A5A</color>
     <color name="on_primary">#FFFFFF</color>
-    <color name="primary_container">#FFD7C2</color>
-    <color name="on_primary_container">#3D1600</color>
-    <color name="secondary">#6E8458</color>
-    <color name="bg">#FFF6EF</color>
-    <color name="surface">#FFFBF7</color>
-    <color name="surface_alt">#FFEFE4</color>
-    <color name="outline">#E7D3C6</color>
-    <color name="text_main">#3B2A22</color>
-    <color name="text_muted">#7A6256</color>
-    <color name="launcher_bg">#F8D4B8</color>
+    <color name="primary_container">#FFD2D6</color>
+    <color name="on_primary_container">#4A1420</color>
+    <color name="secondary">#8A7BA8</color>
+    <color name="secondary_container">#EDE6F5</color>
+    <color name="mint">#6FA89A</color>
+    <color name="bg">#FFF1EA</color>
+    <color name="surface">#FFF8F3</color>
+    <color name="surface_alt">#FFE4D8</color>
+    <color name="outline">#F0C9BC</color>
+    <color name="text_main">#2C211C</color>
+    <color name="text_muted">#7A645C</color>
+    <color name="launcher_bg">#F6C4B4</color>
     <color name="scrim">#66000000</color>
+    <color name="dusk_start">#FFF7F0</color>
+    <color name="dusk_end">#F6C4B4</color>
+    <color name="blush">#FFC9C0</color>
 </resources>

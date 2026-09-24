@@ -38,19 +38,24 @@ class SetupActivity : AppCompatActivity() {
         male = if (editing) settings.isMale else true
         syncGender()
         binding.chipFemale.setOnClickListener {
+            if (editing) return@setOnClickListener
             male = false
             syncGender()
         }
         binding.chipMale.setOnClickListener {
+            if (editing) return@setOnClickListener
             male = true
             syncGender()
         }
         binding.btnGenderNext.setOnClickListener { showNameStep() }
         binding.btnGenderSkip.setOnClickListener {
-            male = true
-            syncGender()
+            if (!editing) {
+                male = true
+                syncGender()
+            }
             showNameStep()
         }
+        if (editing) showNameStep()
         binding.btnNameDone.setOnClickListener { finishSetup(skip = false) }
         binding.btnNameSkip.setOnClickListener { finishSetup(skip = true) }
         binding.inputName.setOnEditorActionListener { _, actionId, _ ->
@@ -79,7 +84,7 @@ class SetupActivity : AppCompatActivity() {
     private fun finishSetup(skip: Boolean) {
         val typed = binding.inputName.text?.toString().orEmpty()
         val name = if (skip) "" else typed
-        settings.applySetup(male, name)
+        settings.applySetup(if (editing) settings.isMale else male, name)
         auth.markCompanionReady()
         if (editing) {
             finish()

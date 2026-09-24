@@ -33,8 +33,11 @@ data class FrameSet(
 
 object PetFrames {
     fun of(settings: PetSettings): FrameSet {
-        dedicated(settings.resolvedStyle())?.let { return it }
-        return of(settings.gender, settings.outfit)
+        val style = settings.resolvedStyle()
+        if (settings.outfit != style.suggestedOutfit) {
+            return of(settings.gender, settings.outfit)
+        }
+        return dedicated(style) ?: of(settings.gender, settings.outfit)
     }
 
     fun of(gender: String, outfit: String): FrameSet {

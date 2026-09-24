@@ -3,10 +3,14 @@ package com.floatdeskpet.app.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     private var pendingStart = false
     private var bindingName = false
     private var panelOpen = false
+    private var hubSheetOpen = false
     private var styleGuard = false
     private lateinit var sfx: PetSfx
 
@@ -65,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
     private val backToClosePanel = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
-            closePanel()
+            if (panelOpen) closePanel() else closeHubSheet()
         }
     }
 
@@ -83,9 +88,21 @@ class MainActivity : AppCompatActivity() {
         binding.profileChip.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
-        binding.fabMenu.setOnClickListener { openPanel() }
-        binding.scrim.setOnClickListener { closePanel() }
+        binding.fabMenu.setOnClickListener { toggleHubSheet() }
+        binding.fabMenu.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN ->
+                    v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(80).start()
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL ->
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(140).start()
+            }
+            false
+        }
+        binding.scrim.setOnClickListener {
+            if (panelOpen) closePanel() else closeHubSheet()
+        }
         binding.panel.btnClosePanel.setOnClickListener { closePanel() }
+        bindHubs()
         binding.panel.btnProfile.setOnClickListener {
             closePanel()
             startActivity(Intent(this, ProfileActivity::class.java))
@@ -113,6 +130,8 @@ class MainActivity : AppCompatActivity() {
             closePanel()
             startActivity(Intent(this, AlbumActivity::class.java))
         }
+        binding.panel.btnWhisper.setOnClickListener { openWhispers() }
+        binding.whisperCard.setOnClickListener { openWhispers() }
         binding.scheduleLine.setOnClickListener {
             val now = binding.scheduleLine.text?.toString().orEmpty()
             val wish = CompanionSchedule.next(settings, now.removePrefix(getString(R.string.schedule_label, "").trim()))
@@ -149,19 +168,6 @@ class MainActivity : AppCompatActivity() {
             settings.missYou = checked
             if (checked) askNotification()
             CompanionMissYou.reschedule(this)
-        }
-        binding.panel.genderGroup.addOnButtonCheckedListener { _, id, checked ->
-            if (!checked) return@addOnButtonCheckedListener
-            val male = id == R.id.genderMale
-            if (settings.isMale == male) return@addOnButtonCheckedListener
-            settings.applyGender(male)
-            syncNameField()
-            applyHomeArt()
-            refreshHero()
-            syncOutfitGroup()
-            rebuildStyleChips()
-            bindOutfitDesc()
-            bindStyleBlurb()
         }
         binding.panel.inputName.doAfterTextChanged {
             if (bindingName) return@doAfterTextChanged
@@ -340,6 +346,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openFeedPanel() {
+        closeHubSheet()
         closePanel()
         val dialog = Dialog(this, android.R.style.Theme_Translucent_NoTitleBar)
         val panel = FeedPanel(
@@ -358,6 +365,12 @@ class MainActivity : AppCompatActivity() {
         )
         dialog.setContentView(panel.root)
         dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.window?.apply {
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        }
         dialog.show()
     }
 
@@ -576,29 +589,113 @@ class MainActivity : AppCompatActivity() {
         binding.panel.root.isFocusable = false
     }
 
+    private fun bindHubs() {
+        binding.panel.hubCompanion.setOnClickListener { expandHub(binding.panel.bodyCompanion) }
+        binding.panel.hubInteract.setOnClickListener { expandHub(binding.panel.bodyInteract) }
+        binding.panel.hubLook.setOnClickListener { expandHub(binding.panel.bodyLook) }
+        binding.panel.hubNest.setOnClickListener { expandHub(binding.panel.bodyNest) }
+        binding.panel.hubSettings.setOnClickListener { expandHub(binding.panel.bodySettings) }
+        binding.fabHubCompanion.setOnClickListener { openFromFab(binding.panel.bodyCompanion) }
+        binding.fabHubInteract.setOnClickListener { openFromFab(binding.panel.bodyInteract) }
+        binding.fabHubLook.setOnClickListener { openFromFab(binding.panel.bodyLook) }
+        binding.fabHubNest.setOnClickListener { openFromFab(binding.panel.bodyNest) }
+        binding.fabHubSettings.setOnClickListener { openFromFab(binding.panel.bodySettings) }
+    }
+
+    private fun hubBodies(): List<View> {
+        return listOf(
+            binding.panel.bodyCompanion,
+            binding.panel.bodyInteract,
+            binding.panel.bodyLook,
+            binding.panel.bodyNest,
+            binding.panel.bodySettings,
+        )
+    }
+
+    private fun expandHub(body: View) {
+        hubBodies().forEach {
+            it.visibility = if (it == body) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun toggleHubSheet() {
+        if (panelOpen) {
+            closePanel()
+            return
+        }
+        if (hubSheetOpen) closeHubSheet() else openHubSheet()
+    }
+
+    private fun openHubSheet() {
+        hubSheetOpen = true
+        binding.scrim.visibility = View.VISIBLE
+        binding.scrim.alpha = 0f
+        binding.scrim.animate().alpha(1f).setDuration(180).start()
+        binding.fabSheet.visibility = View.VISIBLE
+        binding.fabSheet.alpha = 0f
+        binding.fabSheet.scaleX = 0.88f
+        binding.fabSheet.scaleY = 0.88f
+        binding.fabSheet.post {
+            binding.fabSheet.pivotX = binding.fabSheet.width.toFloat()
+            binding.fabSheet.pivotY = binding.fabSheet.height.toFloat()
+        }
+        binding.fabSheet.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180).start()
+        binding.fabMenu.animate().rotation(45f).setDuration(180).start()
+        backToClosePanel.isEnabled = true
+    }
+
+    private fun closeHubSheet() {
+        if (!hubSheetOpen) return
+        hubSheetOpen = false
+        if (!panelOpen) backToClosePanel.isEnabled = false
+        binding.fabSheet.animate().alpha(0f).scaleX(0.88f).scaleY(0.88f).setDuration(140).withEndAction {
+            if (!hubSheetOpen) binding.fabSheet.visibility = View.GONE
+        }.start()
+        if (!panelOpen) {
+            binding.scrim.animate().alpha(0f).setDuration(140).withEndAction {
+                if (!panelOpen && !hubSheetOpen) binding.scrim.visibility = View.GONE
+            }.start()
+        }
+        binding.fabMenu.animate().rotation(0f).setDuration(160).start()
+    }
+
+    private fun openFromFab(body: View) {
+        expandHub(body)
+        closeHubSheet()
+        openPanel()
+    }
+
+    private fun openWhispers() {
+        closePanel()
+        closeHubSheet()
+        startActivity(Intent(this, WhisperActivity::class.java))
+    }
+
     private fun openPanel() {
         panelOpen = true
         binding.scrim.visibility = View.VISIBLE
-        binding.scrim.alpha = 0f
-        binding.scrim.animate().alpha(1f).setDuration(220).start()
+        binding.scrim.animate().cancel()
+        binding.scrim.alpha = 1f
         binding.panel.root.isClickable = true
         binding.panel.root.isFocusable = true
         binding.panel.root.visibility = View.VISIBLE
         binding.panel.root.animate().translationX(0f).setDuration(280).start()
+        binding.fabMenu.animate().rotation(45f).setDuration(180).start()
         backToClosePanel.isEnabled = true
     }
 
     private fun closePanel() {
         if (!panelOpen) return
         panelOpen = false
-        backToClosePanel.isEnabled = false
+        if (!hubSheetOpen) backToClosePanel.isEnabled = false
         val width = binding.panel.root.width.toFloat().coerceAtLeast(1f)
         binding.scrim.animate().alpha(0f).setDuration(200).withEndAction {
-            binding.scrim.visibility = View.GONE
+            if (!panelOpen && !hubSheetOpen) binding.scrim.visibility = View.GONE
         }.start()
         binding.panel.root.animate().translationX(width).setDuration(240).withEndAction {
             if (!panelOpen) parkPanel()
         }.start()
+        if (!hubSheetOpen) binding.fabMenu.animate().rotation(0f).setDuration(160).start()
     }
 
     private fun insetFab() {
@@ -607,6 +704,10 @@ class MainActivity : AppCompatActivity() {
             val extra = (20 * resources.displayMetrics.density).toInt()
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = bars.bottom + extra
+                rightMargin = bars.right + extra
+            }
+            binding.fabSheet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = bars.bottom + extra + (72 * resources.displayMetrics.density).toInt()
                 rightMargin = bars.right + extra
             }
             insets
