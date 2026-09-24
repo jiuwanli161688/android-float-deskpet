@@ -212,7 +212,7 @@ class OverlayFeedPanel(
             gravity = Gravity.CENTER
             isClickable = true
             isFocusable = true
-            minHeight = dp(88)
+            minimumHeight = dp(88)
             setBackgroundResource(if (selected) R.drawable.bg_card_selected else R.drawable.bg_food_cell)
             val pad = dp(8)
             setPadding(pad, dp(10), pad, dp(10))
